@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# PDF test artifacts
+test_input.pdf
+test_output.pdf
+*_print_ready.pdf
+
+# OS
+.DS_Store
