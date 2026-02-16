@@ -249,6 +249,21 @@
       </div>
     </div>
 
+    <!-- Background Style -->
+    <div class="section">
+      <div class="section-title">Background</div>
+      <div class="settings">
+        <div class="setting full-width">
+          <label for="bgStyle">Bleed Background Style</label>
+          <select id="bgStyle">
+            <option value="auto" selected>Auto-detect from slide</option>
+            <option value="blue_gradient">Blue gradient (dark navy &rarr; blue)</option>
+          </select>
+          <div class="desc" id="bgDesc">Extends detected slide background into bleed area</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Safe Margins -->
     <div class="section">
       <div class="section-title">Safe Margins (inside trim)</div>
@@ -333,6 +348,8 @@
 
     const paperSizeEl = document.getElementById('paperSize');
     const bleedEl = document.getElementById('bleed');
+    const bgStyleEl = document.getElementById('bgStyle');
+    const bgDescEl = document.getElementById('bgDesc');
     const marginTopEl = document.getElementById('marginTop');
     const marginBottomEl = document.getElementById('marginBottom');
     const marginLeftEl = document.getElementById('marginLeft');
@@ -391,6 +408,15 @@
       return (bytes / 1048576).toFixed(1) + ' MB';
     }
 
+    // ── Background style description ────────────────────────────────────
+    const BG_DESCRIPTIONS = {
+      auto: 'Extends detected slide background into bleed area',
+      blue_gradient: 'Vertical gradient from dark navy to blue fills the bleed',
+    };
+    bgStyleEl.addEventListener('change', () => {
+      bgDescEl.textContent = BG_DESCRIPTIONS[bgStyleEl.value] || '';
+    });
+
     // ── Settings change → update calc preview ────────────────────────────
     paperSizeEl.addEventListener('change', () => {
       paperDescEl.textContent = PAPER_DESCRIPTIONS[paperSizeEl.value] || '';
@@ -441,6 +467,7 @@
       formData.append('margin_bottom', marginBottomEl.value);
       formData.append('margin_left', marginLeftEl.value);
       formData.append('margin_right', marginRightEl.value);
+      formData.append('bg_style', bgStyleEl.value);
 
       processBtn.disabled = true;
       progressWrap.classList.add('active');

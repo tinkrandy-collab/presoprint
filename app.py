@@ -164,8 +164,37 @@ def build_trim_marks_stream(trim_x, trim_y, trim_w, trim_h):
     return "\n".join(lines)
 
 
+def build_blue_gradient_resources(pdf, media_w, media_h):
+    """Create a PDF axial-shading resource for a vertical blue gradient.
+
+    Returns (shading_dict, shading_name) to add to /Resources/Shading.
+    Gradient runs bottom→top: dark navy → medium blue.
+    """
+    # Colour stops: bottom = dark navy, top = lighter blue
+    c0 = (0.04, 0.06, 0.14)   # #0a0f24  (deep navy)
+    c1 = (0.11, 0.20, 0.38)   # #1c3361  (medium blue)
+
+    # Type 2 exponential interpolation function (N=1 → linear)
+    fn = Dictionary()
+    fn[Name("/FunctionType")] = 2
+    fn[Name("/Domain")] = Array([0, 1])
+    fn[Name("/C0")] = Array([c0[0], c0[1], c0[2]])
+    fn[Name("/C1")] = Array([c1[0], c1[1], c1[2]])
+    fn[Name("/N")] = 1
+
+    shading = Dictionary()
+    shading[Name("/ShadingType")] = 2          # axial
+    shading[Name("/ColorSpace")] = Name.DeviceRGB
+    shading[Name("/Coords")] = Array([0, 0, 0, media_h])  # bottom→top
+    shading[Name("/Function")] = pdf.make_indirect(fn)
+    shading[Name("/Extend")] = Array([True, True])
+
+    shading_name = Name("/BlueGrad")
+    return pdf.make_indirect(shading), shading_name
+
+
 def process_page(pdf, page, page_index, trim_width_in, trim_height_in,
-                 bleed_in, margins, bg_color=None):
+                 bleed_in, margins, bg_color=None, bg_style="auto"):
     """Re-compose a page with safe margins and background-only bleed.
 
     Parameters
@@ -178,6 +207,9 @@ def process_page(pdf, page, page_index, trim_width_in, trim_height_in,
         Keys: left, right, top, bottom — safe margins in inches.
     bg_color : tuple or None
         (r, g, b) 0-1 for the page background.  Auto-detected if None.
+    bg_style : str
+        "auto" (default) – use detected/supplied solid colour.
+        "blue_gradient" – vertical blue gradient background.
     """
     bleed = bleed_in * PTS_PER_INCH
     trim_w = trim_width_in * PTS_PER_INCH
@@ -262,11 +294,24 @@ def process_page(pdf, page, page_index, trim_width_in, trim_height_in,
     cl = []
 
     # 1. Fill entire media box with background (extends into bleed)
-    r, g, b = bg_color
-    cl.append("q")
-    cl.append(f"{r:.6f} {g:.6f} {b:.6f} rg")
-    cl.append(f"0 0 {media_w:.4f} {media_h:.4f} re f")
-    cl.append("Q")
+    if bg_style == "blue_gradient":
+        shading_obj, shading_name = build_blue_gradient_resources(
+            pdf, media_w, media_h)
+        shading_dict = Dictionary()
+        shading_dict[shading_name] = shading_obj
+        new_resources[Name("/Shading")] = shading_dict
+
+        cl.append("q")
+        cl.append(f"0 0 {media_w:.4f} {media_h:.4f} re W n")
+        cl.append(f"{shading_name} sh")
+        cl.append("Q")
+        r, g, b = (0.04, 0.06, 0.14)   # report the dark end
+    else:
+        r, g, b = bg_color
+        cl.append("q")
+        cl.append(f"{r:.6f} {g:.6f} {b:.6f} rg")
+        cl.append(f"0 0 {media_w:.4f} {media_h:.4f} re f")
+        cl.append("Q")
 
     # 2. Place original slide scaled into the safe area
     cl.append("q")
@@ -312,7 +357,8 @@ def process_page(pdf, page, page_index, trim_width_in, trim_height_in,
             "top": round(bleed / 72, 4),
             "bottom": round(bleed / 72, 4),
         },
-        "background_color": f"rgb({r:.2f}, {g:.2f}, {b:.2f})",
+        "background_color": "blue gradient" if bg_style == "blue_gradient"
+                           else f"rgb({r:.2f}, {g:.2f}, {b:.2f})",
     }
 
 
@@ -356,13 +402,14 @@ def verify_page(page, trim_width_in, trim_height_in, bleed_in):
 
 
 def process_pdf_file(input_path, output_path, trim_width_in, trim_height_in,
-                     bleed_in, margins):
+                     bleed_in, margins, bg_style="auto"):
     pdf = Pdf.open(input_path)
     pages_info = []
     for i, page in enumerate(pdf.pages):
         info = process_page(pdf, page, i,
                             trim_width_in, trim_height_in,
-                            bleed_in, margins)
+                            bleed_in, margins,
+                            bg_style=bg_style)
         pages_info.append(info)
     pdf.save(output_path, linearize=False)
     pdf.close()
@@ -434,6 +481,10 @@ def api_process():
         "bottom": float(request.form.get("margin_bottom",  DEFAULT_MARGIN_BOTTOM)),
     }
 
+    bg_style = request.form.get("bg_style", "auto")
+    if bg_style not in ("auto", "blue_gradient"):
+        bg_style = "auto"
+
     job_id = str(uuid.uuid4())[:8]
     job_dir = os.path.join(UPLOAD_DIR, job_id)
     os.makedirs(job_dir, exist_ok=True)
@@ -445,7 +496,8 @@ def api_process():
     try:
         result = process_pdf_file(input_path, output_path,
                                   trim_width, trim_height,
-                                  bleed, margins)
+                                  bleed, margins,
+                                  bg_style=bg_style)
         result["job_id"] = job_id
         result["filename"] = file.filename
         return jsonify(result)
