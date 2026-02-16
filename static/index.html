@@ -19,6 +19,7 @@
       --green: #3ecf8e;
       --red: #f04848;
       --orange: #f5a623;
+      --blue: #4da6ff;
     }
 
     body {
@@ -35,106 +36,77 @@
       padding: 40px 24px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-    }
-    header p {
-      color: var(--text-dim);
-      font-size: 15px;
-    }
+    header { text-align: center; margin-bottom: 40px; }
+    header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    header p { color: var(--text-dim); font-size: 15px; }
 
     /* Drop zone */
     .dropzone {
-      border: 2px dashed var(--border);
-      border-radius: 12px;
-      padding: 48px 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
+      border: 2px dashed var(--border); border-radius: 12px; padding: 48px 24px;
+      text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s;
       background: var(--surface);
     }
-    .dropzone:hover, .dropzone.dragover {
-      border-color: var(--accent);
-      background: var(--surface-2);
-    }
-    .dropzone-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-      opacity: 0.5;
-    }
-    .dropzone-label {
-      font-size: 16px;
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
-    .dropzone-sub {
-      font-size: 13px;
-      color: var(--text-dim);
-    }
+    .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: var(--surface-2); }
+    .dropzone-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+    .dropzone-label { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+    .dropzone-sub { font-size: 13px; color: var(--text-dim); }
     .dropzone input[type="file"] { display: none; }
 
-    /* Settings */
-    .settings {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 24px;
+    /* Sections */
+    .section { margin-top: 24px; }
+    .section-title {
+      font-size: 13px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--accent); margin-bottom: 12px;
+      padding-bottom: 6px; border-bottom: 1px solid var(--border);
     }
+
+    /* Settings grid */
+    .settings { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .setting {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px;
     }
+    .setting.full-width { grid-column: 1 / -1; }
     .setting label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-dim);
-      margin-bottom: 8px;
+      display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--text-dim); margin-bottom: 8px;
     }
-    .setting input {
-      width: 100%;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 12px;
-      color: var(--text);
-      font-size: 15px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
+    .setting select, .setting input {
+      width: 100%; background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 12px; color: var(--text); font-size: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
-    .setting input:focus {
-      outline: none;
-      border-color: var(--accent);
+    .setting input[type="number"] { font-family: 'SF Mono', 'Fira Code', monospace; }
+    .setting select:focus, .setting input:focus { outline: none; border-color: var(--accent); }
+    .setting .unit { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+    .setting .desc { font-size: 11px; color: var(--text-dim); margin-top: 3px; font-style: italic; }
+
+    /* Margin grid — 4 cols */
+    .margin-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+    .margin-grid .setting { padding: 12px; }
+    .margin-grid .setting label { font-size: 11px; margin-bottom: 6px; }
+
+    /* Calculated dimensions preview */
+    .calc-preview {
+      margin-top: 12px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 16px; display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px;
     }
-    .setting .unit {
-      font-size: 12px;
-      color: var(--text-dim);
-      margin-top: 4px;
+    .calc-item { text-align: center; }
+    .calc-item .calc-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-dim); margin-bottom: 2px;
+    }
+    .calc-item .calc-value {
+      font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace;
+      font-weight: 600; color: var(--blue);
     }
 
     /* Process button */
     .btn {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      margin-top: 24px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+      display: block; width: 100%; padding: 14px; margin-top: 24px;
+      background: var(--accent); color: #fff; font-size: 15px; font-weight: 600;
+      border: none; border-radius: 8px; cursor: pointer;
       transition: background 0.2s, opacity 0.2s;
     }
     .btn:hover { background: var(--accent-hover); }
@@ -142,174 +114,86 @@
 
     /* Progress bar */
     .progress-wrap {
-      display: none;
-      margin-top: 24px;
-      background: var(--surface);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border);
+      display: none; margin-top: 24px; background: var(--surface);
+      border-radius: 8px; overflow: hidden; border: 1px solid var(--border);
     }
     .progress-wrap.active { display: block; }
-    .progress-bar {
-      height: 4px;
-      background: var(--accent);
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-    .progress-text {
-      padding: 12px 16px;
-      font-size: 14px;
-      color: var(--text-dim);
-    }
+    .progress-bar { height: 4px; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+    .progress-text { padding: 12px 16px; font-size: 14px; color: var(--text-dim); }
 
     /* File info pill */
     .file-info {
-      display: none;
-      align-items: center;
-      gap: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-top: 16px;
+      display: none; align-items: center; gap: 12px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-top: 16px;
     }
     .file-info.active { display: flex; }
-    .file-info .name {
-      flex: 1;
-      font-size: 14px;
-      font-weight: 500;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .file-info .size {
-      font-size: 13px;
-      color: var(--text-dim);
-      white-space: nowrap;
-    }
-    .file-info .remove {
-      background: none;
-      border: none;
-      color: var(--text-dim);
-      cursor: pointer;
-      font-size: 18px;
-      padding: 0 4px;
-      line-height: 1;
-    }
+    .file-info .name { flex: 1; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-info .size { font-size: 13px; color: var(--text-dim); white-space: nowrap; }
+    .file-info .remove { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 18px; padding: 0 4px; line-height: 1; }
     .file-info .remove:hover { color: var(--red); }
 
     /* Results */
-    .results {
-      display: none;
-      margin-top: 32px;
-    }
+    .results { display: none; margin-top: 32px; }
     .results.active { display: block; }
-    .results h2 {
-      font-size: 18px;
-      font-weight: 600;
+
+    /* Download button — prominent at top */
+    .download-btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 18px 28px; background: var(--green); color: #0f1117;
+      font-size: 16px; font-weight: 700; border: none; border-radius: 10px;
+      cursor: pointer; text-decoration: none; transition: opacity 0.2s, transform 0.1s;
       margin-bottom: 16px;
     }
+    .download-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    /* Processing details toggle */
+    .details-toggle {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 12px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text-dim); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: color 0.15s, background 0.15s;
+    }
+    .details-toggle:hover { color: var(--text); background: var(--surface-2); }
+    .details-toggle .arrow { font-size: 10px; transition: transform 0.2s ease; }
+    .details-toggle.open .arrow { transform: rotate(180deg); }
+    .details-container { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .details-container.open { max-height: 10000px; }
+    .details-inner { padding-top: 16px; }
 
     .result-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 16px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 20px; margin-bottom: 16px;
     }
     .result-card h3 {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-size: 14px; font-weight: 600; margin-bottom: 12px;
+      color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;
     }
-
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .stat {
-      padding: 10px 12px;
-      background: var(--surface-2);
-      border-radius: 6px;
-    }
-    .stat .label {
-      font-size: 11px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      margin-bottom: 2px;
-    }
-    .stat .value {
-      font-size: 14px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-weight: 500;
-    }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat { padding: 10px 12px; background: var(--surface-2); border-radius: 6px; }
+    .stat .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
+    .stat .value { font-size: 14px; font-family: 'SF Mono', 'Fira Code', monospace; font-weight: 500; }
 
     /* Checks */
-    .checks-list {
-      list-style: none;
-    }
-    .checks-list li {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 0;
-      font-size: 14px;
-      border-bottom: 1px solid var(--border);
-    }
+    .checks-list { list-style: none; }
+    .checks-list li { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 14px; border-bottom: 1px solid var(--border); }
     .checks-list li:last-child { border-bottom: none; }
-    .check-icon {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
+    .check-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
     .check-icon.pass { background: rgba(62,207,142,0.15); color: var(--green); }
     .check-icon.fail { background: rgba(240,72,72,0.15); color: var(--red); }
 
-    .download-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 24px;
-      margin-top: 8px;
-      background: var(--green);
-      color: #0f1117;
-      font-size: 15px;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: opacity 0.2s;
-    }
-    .download-btn:hover { opacity: 0.85; }
-
     /* Error */
     .error-msg {
-      display: none;
-      margin-top: 16px;
-      padding: 12px 16px;
-      background: rgba(240,72,72,0.1);
-      border: 1px solid rgba(240,72,72,0.3);
-      border-radius: 8px;
-      color: var(--red);
-      font-size: 14px;
+      display: none; margin-top: 16px; padding: 12px 16px;
+      background: rgba(240,72,72,0.1); border: 1px solid rgba(240,72,72,0.3);
+      border-radius: 8px; color: var(--red); font-size: 14px;
     }
     .error-msg.active { display: block; }
 
-    @media (max-width: 540px) {
+    @media (max-width: 600px) {
       .settings { grid-template-columns: 1fr; }
+      .margin-grid { grid-template-columns: 1fr 1fr; }
       .stat-grid { grid-template-columns: 1fr; }
+      .calc-preview { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -317,7 +201,7 @@
   <div class="container">
     <header>
       <h1>PDF Print Production</h1>
-      <p>Resize, add bleed, trim marks, and set PDF boxes for professional print</p>
+      <p>Safe-margin layout with background-only bleed for print-ready PDFs</p>
     </header>
 
     <!-- Drop Zone -->
@@ -335,17 +219,80 @@
       <button class="remove" id="removeFile">&times;</button>
     </div>
 
-    <!-- Settings -->
-    <div class="settings">
-      <div class="setting">
-        <label for="trimWidth">Trim Width</label>
-        <input type="number" id="trimWidth" value="10.5" step="0.125" min="1">
-        <div class="unit">inches</div>
+    <!-- Paper Size -->
+    <div class="section">
+      <div class="section-title">Paper Size</div>
+      <div class="settings">
+        <div class="setting full-width">
+          <label for="paperSize">Target Paper (Landscape)</label>
+          <select id="paperSize">
+            <option value="letter" selected>US Letter (11" x 8.5") &mdash; Standard US</option>
+            <option value="a4">A4 (297mm x 210mm) &mdash; International standard</option>
+            <option value="a5">A5 (210mm x 148mm) &mdash; Half A4, Europe/Asia</option>
+            <option value="b5_jis">B5 JIS (257mm x 182mm) &mdash; Common in Japan</option>
+            <option value="tabloid">Tabloid / Ledger (17" x 11") &mdash; Large US</option>
+          </select>
+          <div class="desc" id="paperDesc">Standard US paper size</div>
+        </div>
       </div>
-      <div class="setting">
-        <label for="bleed">Bleed</label>
-        <input type="number" id="bleed" value="0.125" step="0.0625" min="0">
-        <div class="unit">inches (all sides)</div>
+    </div>
+
+    <!-- Bleed -->
+    <div class="section">
+      <div class="section-title">Bleed</div>
+      <div class="settings">
+        <div class="setting">
+          <label for="bleed">Bleed</label>
+          <input type="number" id="bleed" value="0.125" step="0.0625" min="0.0625" max="0.25">
+          <div class="unit">inches (all sides)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Safe Margins -->
+    <div class="section">
+      <div class="section-title">Safe Margins (inside trim)</div>
+      <div class="margin-grid">
+        <div class="setting">
+          <label for="marginTop">Top (binding)</label>
+          <input type="number" id="marginTop" value="1.5" step="0.125" min="0.25">
+          <div class="unit">inches</div>
+        </div>
+        <div class="setting">
+          <label for="marginBottom">Bottom</label>
+          <input type="number" id="marginBottom" value="0.5" step="0.125" min="0.25">
+          <div class="unit">inches</div>
+        </div>
+        <div class="setting">
+          <label for="marginLeft">Left</label>
+          <input type="number" id="marginLeft" value="0.5" step="0.125" min="0.25">
+          <div class="unit">inches</div>
+        </div>
+        <div class="setting">
+          <label for="marginRight">Right</label>
+          <input type="number" id="marginRight" value="0.5" step="0.125" min="0.25">
+          <div class="unit">inches</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calculated dimensions preview -->
+    <div class="calc-preview" id="calcPreview">
+      <div class="calc-item">
+        <div class="calc-label">Paper</div>
+        <div class="calc-value" id="calcPaper">11.000" x 8.500"</div>
+      </div>
+      <div class="calc-item">
+        <div class="calc-label">Trim</div>
+        <div class="calc-value" id="calcTrim">--</div>
+      </div>
+      <div class="calc-item">
+        <div class="calc-label">Safe Area</div>
+        <div class="calc-value" id="calcSafe">--</div>
+      </div>
+      <div class="calc-item">
+        <div class="calc-label">Media</div>
+        <div class="calc-value" id="calcMedia">--</div>
       </div>
     </div>
 
@@ -363,8 +310,8 @@
 
     <!-- Results -->
     <div class="results" id="results">
-      <h2>Results</h2>
-      <div id="resultsContent"></div>
+      <div id="downloadArea"></div>
+      <div id="detailsArea"></div>
     </div>
   </div>
 
@@ -381,11 +328,32 @@
     const progressText = document.getElementById('progressText');
     const errorMsg = document.getElementById('errorMsg');
     const results = document.getElementById('results');
-    const resultsContent = document.getElementById('resultsContent');
+    const downloadArea = document.getElementById('downloadArea');
+    const detailsArea = document.getElementById('detailsArea');
+
+    const paperSizeEl = document.getElementById('paperSize');
+    const bleedEl = document.getElementById('bleed');
+    const marginTopEl = document.getElementById('marginTop');
+    const marginBottomEl = document.getElementById('marginBottom');
+    const marginLeftEl = document.getElementById('marginLeft');
+    const marginRightEl = document.getElementById('marginRight');
+    const paperDescEl = document.getElementById('paperDesc');
+    const calcPaper = document.getElementById('calcPaper');
+    const calcTrim = document.getElementById('calcTrim');
+    const calcSafe = document.getElementById('calcSafe');
+    const calcMedia = document.getElementById('calcMedia');
 
     let selectedFile = null;
 
-    // Drag and drop
+    const PAPER_DESCRIPTIONS = {
+      letter: 'Standard US paper size',
+      a4: 'International standard (ISO 216)',
+      a5: 'Half of A4, common in Europe & Asia',
+      b5_jis: 'Common in Japan for books & magazines',
+      tabloid: 'Large US format, 2x Letter',
+    };
+
+    // ── Drag & drop ──────────────────────────────────────────────────────
     dropzone.addEventListener('click', () => fileInput.click());
     dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
     dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
@@ -398,7 +366,6 @@
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length) setFile(fileInput.files[0]);
     });
-
     removeFile.addEventListener('click', clearFile);
 
     function setFile(file) {
@@ -410,7 +377,6 @@
       results.classList.remove('active');
       errorMsg.classList.remove('active');
     }
-
     function clearFile() {
       selectedFile = null;
       fileInput.value = '';
@@ -419,24 +385,62 @@
       results.classList.remove('active');
       errorMsg.classList.remove('active');
     }
-
     function formatSize(bytes) {
       if (bytes < 1024) return bytes + ' B';
       if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       return (bytes / 1048576).toFixed(1) + ' MB';
     }
 
-    // Process
+    // ── Settings change → update calc preview ────────────────────────────
+    paperSizeEl.addEventListener('change', () => {
+      paperDescEl.textContent = PAPER_DESCRIPTIONS[paperSizeEl.value] || '';
+      updateCalcPreview();
+    });
+    [bleedEl, marginTopEl, marginBottomEl, marginLeftEl, marginRightEl]
+      .forEach(el => el.addEventListener('input', updateCalcPreview));
+
+    function updateCalcPreview() {
+      const bleed = parseFloat(bleedEl.value) || 0.125;
+      fetch(`/api/paper-sizes?bleed=${bleed}`)
+        .then(r => r.json())
+        .then(data => {
+          const ps = data[paperSizeEl.value];
+          if (!ps) return;
+          const mt = parseFloat(marginTopEl.value) || 1.5;
+          const mb = parseFloat(marginBottomEl.value) || 0.5;
+          const ml = parseFloat(marginLeftEl.value) || 0.5;
+          const mr = parseFloat(marginRightEl.value) || 0.5;
+          const safeW = ps.trim_width_in - ml - mr;
+          const safeH = ps.trim_height_in - mt - mb;
+          calcPaper.textContent = `${ps.paper_width_in.toFixed(3)}" x ${ps.paper_height_in.toFixed(3)}"`;
+          calcTrim.textContent = `${ps.trim_width_in.toFixed(3)}" x ${ps.trim_height_in.toFixed(3)}"`;
+          calcSafe.textContent = safeW > 0 && safeH > 0
+            ? `${safeW.toFixed(3)}" x ${safeH.toFixed(3)}"`
+            : 'margins too large';
+          const mediaW = ps.paper_width_in;
+          const mediaH = ps.paper_height_in;
+          calcMedia.textContent = `${mediaW.toFixed(3)}" x ${mediaH.toFixed(3)}"`;
+        })
+        .catch(() => {
+          calcTrim.textContent = '--';
+          calcSafe.textContent = '--';
+          calcMedia.textContent = '--';
+        });
+    }
+    updateCalcPreview();
+
+    // ── Process ──────────────────────────────────────────────────────────
     processBtn.addEventListener('click', async () => {
       if (!selectedFile) return;
 
-      const trimWidth = document.getElementById('trimWidth').value;
-      const bleed = document.getElementById('bleed').value;
-
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('trim_width', trimWidth);
-      formData.append('bleed', bleed);
+      formData.append('paper_size', paperSizeEl.value);
+      formData.append('bleed', bleedEl.value);
+      formData.append('margin_top', marginTopEl.value);
+      formData.append('margin_bottom', marginBottomEl.value);
+      formData.append('margin_left', marginLeftEl.value);
+      formData.append('margin_right', marginRightEl.value);
 
       processBtn.disabled = true;
       progressWrap.classList.add('active');
@@ -446,7 +450,6 @@
       results.classList.remove('active');
 
       try {
-        // Upload with progress
         const xhr = new XMLHttpRequest();
         const response = await new Promise((resolve, reject) => {
           xhr.upload.addEventListener('progress', e => {
@@ -467,14 +470,8 @@
           xhr.send(formData);
         });
 
-        // Animate progress to 100
         progressBar.style.width = '100%';
-
-        if (response.error) {
-          showError(response.error);
-          return;
-        }
-
+        if (response.error) { showError(response.error); return; }
         renderResults(response);
       } catch (err) {
         showError(err.message || 'Something went wrong');
@@ -490,36 +487,40 @@
       progressWrap.classList.remove('active');
     }
 
+    // ── Render results ───────────────────────────────────────────────────
     function renderResults(data) {
-      let html = '';
+      const totalPages = data.pages.length;
+      const allPassed = data.verification.every(v => v.all_pass);
+      const dlName = encodeURIComponent(data.filename || 'output');
 
-      // Per-page info
-      data.pages.forEach((pg, i) => {
+      // Download button at top
+      downloadArea.innerHTML = `
+        <a class="download-btn" href="/api/download/${data.job_id}?name=${dlName}">
+          &#11015; Download Print-Ready PDF
+        </a>
+        <button class="details-toggle" id="detailsToggle">
+          <span>Show processing details (${totalPages} page${totalPages !== 1 ? 's' : ''}${allPassed ? ', all checks passed' : ', issues found'})</span>
+          <span class="arrow">&#9660;</span>
+        </button>`;
+
+      // Collapsed processing details
+      let html = '<div class="details-container" id="detailsContainer"><div class="details-inner">';
+
+      data.pages.forEach(pg => {
         html += `
           <div class="result-card">
             <h3>Page ${pg.page}</h3>
             <div class="stat-grid">
-              <div class="stat">
-                <div class="label">Original</div>
-                <div class="value">${pg.original_size}</div>
-              </div>
-              <div class="stat">
-                <div class="label">Trim Size</div>
-                <div class="value">${pg.trim_size}</div>
-              </div>
-              <div class="stat">
-                <div class="label">Media Size</div>
-                <div class="value">${pg.media_size}</div>
-              </div>
-              <div class="stat">
-                <div class="label">Scale Factor</div>
-                <div class="value">${pg.scale_factor}</div>
-              </div>
+              <div class="stat"><div class="label">Original</div><div class="value">${pg.original_size}</div></div>
+              <div class="stat"><div class="label">Trim Size</div><div class="value">${pg.trim_size}</div></div>
+              <div class="stat"><div class="label">Media Size</div><div class="value">${pg.media_size}</div></div>
+              <div class="stat"><div class="label">Safe Area</div><div class="value">${pg.safe_area}</div></div>
+              <div class="stat"><div class="label">Scale Factor</div><div class="value">${pg.scale_factor}</div></div>
+              <div class="stat"><div class="label">Background</div><div class="value">${pg.background_color}</div></div>
             </div>
           </div>`;
       });
 
-      // Verification
       data.verification.forEach(v => {
         html += `
           <div class="result-card">
@@ -535,15 +536,14 @@
           </div>`;
       });
 
-      // Download
-      const dlName = encodeURIComponent(data.filename || 'output');
-      html += `
-        <a class="download-btn" href="/api/download/${data.job_id}?name=${dlName}">
-          &#11015; Download Print-Ready PDF
-        </a>`;
-
-      resultsContent.innerHTML = html;
+      html += '</div></div>';
+      detailsArea.innerHTML = html;
       results.classList.add('active');
+
+      document.getElementById('detailsToggle').addEventListener('click', function() {
+        this.classList.toggle('open');
+        document.getElementById('detailsContainer').classList.toggle('open');
+      });
     }
   </script>
 </body>
