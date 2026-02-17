@@ -354,6 +354,47 @@ def render_thumbnails(pdf_path, dpi=THUMBNAIL_DPI):
     return thumbs
 
 
+def render_flipbook_thumbnails(processed_path, pages_info, bleed_in, dpi=150):
+    """Render thumbnails cropped to trim area with flipped pages un-flipped.
+
+    Creates a temporary PDF cropped to the TrimBox with flipped pages
+    rotated back to normal orientation, then renders thumbnails from it.
+    """
+    bleed = bleed_in * PTS_PER_INCH
+
+    src = Pdf.open(processed_path)
+    bound = Pdf.new()
+
+    for i, src_page in enumerate(src.pages):
+        bound.pages.append(src_page)
+        page = bound.pages[-1]
+
+        mbox = [float(v) for v in page.mediabox]
+        page.obj[Name.MediaBox] = Array([
+            mbox[0] + bleed, mbox[1] + bleed,
+            mbox[2] - bleed, mbox[3] - bleed,
+        ])
+
+        for box_name in [Name.TrimBox, Name.BleedBox, Name.CropBox]:
+            if box_name in page.obj:
+                del page.obj[box_name]
+
+        if i < len(pages_info) and pages_info[i].get("flipped", False):
+            page.obj[Name.Rotate] = 180
+
+    temp_path = processed_path + ".flipbook.pdf"
+    bound.save(temp_path)
+    bound.close()
+    src.close()
+
+    thumbs = render_thumbnails(temp_path, dpi=dpi)
+    try:
+        os.remove(temp_path)
+    except OSError:
+        pass
+    return thumbs
+
+
 def verify_page(page, trim_width_in, trim_height_in, bleed_in):
     bleed = bleed_in * PTS_PER_INCH
     mbox = [float(v) for v in page.mediabox]
@@ -618,6 +659,16 @@ def api_process():
         )
         result["job_id"] = job_id
         result["filename"] = filename
+
+        # Save processing info for flipbook preview
+        flipbook_info = {
+            "pages": result["pages"],
+            "bleed_in": bleed,
+        }
+        info_path = os.path.join(UPLOAD_DIR, job_id, "job_info.json")
+        with open(info_path, "w") as f:
+            json.dump(flipbook_info, f)
+
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -635,6 +686,30 @@ def api_download(job_id):
     base = os.path.splitext(original_name)[0]
     download_name = f"{base}_print_ready.pdf"
     return send_file(output_path, as_attachment=True, download_name=download_name)
+
+
+@app.route("/api/flipbook/<job_id>")
+def api_flipbook(job_id):
+    """Return trimmed, un-flipped thumbnails for the flip-book preview."""
+    if not job_id.isalnum() or len(job_id) != 8:
+        return jsonify({"error": "Invalid job ID"}), 400
+
+    output_path = os.path.join(UPLOAD_DIR, job_id, "output.pdf")
+    info_path = os.path.join(UPLOAD_DIR, job_id, "job_info.json")
+
+    if not os.path.isfile(output_path):
+        return jsonify({"error": "File not found. Please process first."}), 404
+    if not os.path.isfile(info_path):
+        return jsonify({"error": "Processing info not found."}), 404
+
+    try:
+        with open(info_path) as f:
+            info = json.load(f)
+        thumbs = render_flipbook_thumbnails(
+            output_path, info["pages"], info["bleed_in"])
+        return jsonify({"thumbnails": thumbs, "page_count": len(thumbs)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
