@@ -8,315 +8,856 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --surface-2: #232733;
-      --border: #2e3345;
-      --text: #e4e6ef;
-      --text-dim: #8b8fa3;
-      --accent: #6c63ff;
-      --accent-hover: #7f78ff;
-      --green: #3ecf8e;
-      --red: #f04848;
-      --orange: #f5a623;
-      --blue: #4da6ff;
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface-alt: #fafafa;
+      --border: #d2d2d7;
+      --border-light: #e8e8ed;
+      --text: #1d1d1f;
+      --text-secondary: #86868b;
+      --text-tertiary: #aeaeb2;
+      --accent: #0071e3;
+      --accent-hover: #0077ED;
+      --green: #34c759;
+      --red: #ff3b30;
+      --orange: #ff9500;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+      --transition: 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+                   'Helvetica Neue', Helvetica, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      line-height: 1.5;
+      line-height: 1.47;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     .container {
-      max-width: 720px;
+      max-width: 800px;
       margin: 0 auto;
-      padding: 40px 24px;
+      padding: 48px 24px 80px;
     }
 
-    header { text-align: center; margin-bottom: 40px; }
-    header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
-    header p { color: var(--text-dim); font-size: 15px; }
+    /* ── Header ──────────────────────────────────────────────── */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    header h1 {
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    header p {
+      font-size: 17px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
 
-    /* Drop zone */
-    .dropzone {
-      border: 2px dashed var(--border); border-radius: 12px; padding: 48px 24px;
-      text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    /* ── Cards ────────────────────────────────────────────────── */
+    .card {
       background: var(--surface);
-    }
-    .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: var(--surface-2); }
-    .dropzone-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
-    .dropzone-label { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
-    .dropzone-sub { font-size: 13px; color: var(--text-dim); }
-    .dropzone input[type="file"] { display: none; }
-
-    /* Sections */
-    .section { margin-top: 24px; }
-    .section-title {
-      font-size: 13px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.5px; color: var(--accent); margin-bottom: 12px;
-      padding-bottom: 6px; border-bottom: 1px solid var(--border);
-    }
-
-    /* Settings grid */
-    .settings { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .setting {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; padding: 16px;
-    }
-    .setting.full-width { grid-column: 1 / -1; }
-    .setting label {
-      display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.5px; color: var(--text-dim); margin-bottom: 8px;
-    }
-    .setting select, .setting input {
-      width: 100%; background: var(--surface-2); border: 1px solid var(--border);
-      border-radius: 6px; padding: 8px 12px; color: var(--text); font-size: 14px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-    .setting input[type="number"] { font-family: 'SF Mono', 'Fira Code', monospace; }
-    .setting select:focus, .setting input:focus { outline: none; border-color: var(--accent); }
-    .setting .unit { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
-    .setting .desc { font-size: 11px; color: var(--text-dim); margin-top: 3px; font-style: italic; }
-
-    /* Margin grid — 4 cols */
-    .margin-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
-    .margin-grid .setting { padding: 12px; }
-    .margin-grid .setting label { font-size: 11px; margin-bottom: 6px; }
-
-    /* Calculated dimensions preview */
-    .calc-preview {
-      margin-top: 12px; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; padding: 14px 16px; display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px;
-    }
-    .calc-item { text-align: center; }
-    .calc-item .calc-label {
-      font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
-      color: var(--text-dim); margin-bottom: 2px;
-    }
-    .calc-item .calc-value {
-      font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace;
-      font-weight: 600; color: var(--blue);
-    }
-
-    /* Process button */
-    .btn {
-      display: block; width: 100%; padding: 14px; margin-top: 24px;
-      background: var(--accent); color: #fff; font-size: 15px; font-weight: 600;
-      border: none; border-radius: 8px; cursor: pointer;
-      transition: background 0.2s, opacity 0.2s;
-    }
-    .btn:hover { background: var(--accent-hover); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    /* Progress bar */
-    .progress-wrap {
-      display: none; margin-top: 24px; background: var(--surface);
-      border-radius: 8px; overflow: hidden; border: 1px solid var(--border);
-    }
-    .progress-wrap.active { display: block; }
-    .progress-bar { height: 4px; background: var(--accent); width: 0%; transition: width 0.3s ease; }
-    .progress-text { padding: 12px 16px; font-size: 14px; color: var(--text-dim); }
-
-    /* File info pill */
-    .file-info {
-      display: none; align-items: center; gap: 12px; background: var(--surface);
-      border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-top: 16px;
-    }
-    .file-info.active { display: flex; }
-    .file-info .name { flex: 1; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .file-info .size { font-size: 13px; color: var(--text-dim); white-space: nowrap; }
-    .file-info .remove { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 18px; padding: 0 4px; line-height: 1; }
-    .file-info .remove:hover { color: var(--red); }
-
-    /* Results */
-    .results { display: none; margin-top: 32px; }
-    .results.active { display: block; }
-
-    /* Download button — prominent at top */
-    .download-btn {
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      width: 100%; padding: 18px 28px; background: var(--green); color: #0f1117;
-      font-size: 16px; font-weight: 700; border: none; border-radius: 10px;
-      cursor: pointer; text-decoration: none; transition: opacity 0.2s, transform 0.1s;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+      padding: 24px;
       margin-bottom: 16px;
     }
-    .download-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-
-    /* Processing details toggle */
-    .details-toggle {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      width: 100%; padding: 12px; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text-dim); font-size: 13px; font-weight: 500;
-      cursor: pointer; transition: color 0.15s, background 0.15s;
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
     }
-    .details-toggle:hover { color: var(--text); background: var(--surface-2); }
-    .details-toggle .arrow { font-size: 10px; transition: transform 0.2s ease; }
-    .details-toggle.open .arrow { transform: rotate(180deg); }
-    .details-container { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
-    .details-container.open { max-height: 10000px; }
-    .details-inner { padding-top: 16px; }
 
-    .result-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; padding: 20px; margin-bottom: 16px;
+    /* ── Drop zone ───────────────────────────────────────────── */
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition);
+      background: var(--surface);
     }
-    .result-card h3 {
-      font-size: 14px; font-weight: 600; margin-bottom: 12px;
-      color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(0, 113, 227, 0.03);
     }
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .stat { padding: 10px 12px; background: var(--surface-2); border-radius: 6px; }
-    .stat .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px; }
-    .stat .value { font-size: 14px; font-family: 'SF Mono', 'Fira Code', monospace; font-weight: 500; }
+    .dropzone-icon {
+      width: 48px; height: 48px;
+      margin: 0 auto 16px;
+      opacity: 0.4;
+    }
+    .dropzone-icon svg {
+      width: 48px; height: 48px;
+      fill: none; stroke: var(--text-secondary); stroke-width: 1.5;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    .dropzone-label {
+      font-size: 17px; font-weight: 500; color: var(--text);
+      margin-bottom: 4px;
+    }
+    .dropzone-sub {
+      font-size: 14px; color: var(--text-tertiary);
+    }
+    .dropzone input[type="file"] { display: none; }
 
-    /* Checks */
-    .checks-list { list-style: none; }
-    .checks-list li { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 14px; border-bottom: 1px solid var(--border); }
-    .checks-list li:last-child { border-bottom: none; }
-    .check-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
-    .check-icon.pass { background: rgba(62,207,142,0.15); color: var(--green); }
-    .check-icon.fail { background: rgba(240,72,72,0.15); color: var(--red); }
+    /* ── File info pill ──────────────────────────────────────── */
+    .file-info {
+      display: none; align-items: center; gap: 12px;
+      background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm); padding: 12px 16px;
+      margin-top: 12px; box-shadow: var(--shadow-sm);
+    }
+    .file-info.active { display: flex; }
+    .file-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: linear-gradient(135deg, #ff3b30 0%, #ff6b6b 100%);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .file-details { flex: 1; min-width: 0; }
+    .file-name {
+      font-size: 14px; font-weight: 500; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+    }
+    .file-size { font-size: 12px; color: var(--text-tertiary); }
+    .file-remove {
+      background: none; border: none; color: var(--text-tertiary);
+      cursor: pointer; font-size: 20px; padding: 4px 8px; line-height: 1;
+      border-radius: 6px; transition: all var(--transition);
+    }
+    .file-remove:hover { color: var(--red); background: rgba(255,59,48,0.08); }
 
-    /* Error */
+    /* ── Page thumbnails grid ────────────────────────────────── */
+    .pages-grid {
+      display: none;
+      margin-top: 16px;
+    }
+    .pages-grid.active { display: block; }
+    .pages-scroll {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+    }
+    .page-card {
+      position: relative;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--surface-alt);
+      border: 2px solid var(--border-light);
+      transition: all var(--transition);
+      cursor: default;
+    }
+    .page-card:hover {
+      box-shadow: var(--shadow);
+    }
+    .page-card.deleted {
+      opacity: 0.35;
+      border-color: var(--red);
+    }
+    .page-card.deleted .page-thumb-img {
+      filter: grayscale(1);
+    }
+    .page-thumb {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      background: #e8e8ed;
+    }
+    .page-thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #fff;
+    }
+    .page-badge {
+      position: absolute;
+      top: 8px; left: 8px;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .page-delete-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.45);
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .page-delete-btn:hover {
+      background: var(--red);
+      transform: scale(1.1);
+    }
+    .page-card.deleted .page-delete-btn {
+      background: var(--green);
+    }
+    .page-card.deleted .page-delete-btn:hover {
+      background: #2aad4a;
+    }
+    .page-info {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .page-label {
+      font-weight: 500;
+      color: var(--text);
+    }
+    .page-deleted-label {
+      display: none;
+      color: var(--red);
+      font-weight: 500;
+      font-size: 11px;
+    }
+    .page-card.deleted .page-deleted-label { display: inline; }
+    .page-card.deleted .page-dims { display: none; }
+
+    /* ── Form controls ───────────────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label {
+      font-size: 12px; font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .form-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%2386868b' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+    }
+    .form-input[type="number"] {
+      font-family: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+      font-size: 14px;
+    }
+    .form-hint {
+      font-size: 12px; color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+
+    /* ── Margin grid ─────────────────────────────────────────── */
+    .margin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* ── Toggle switch ───────────────────────────────────────── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 0;
+    }
+    .toggle-label-text {
+      font-size: 15px;
+      color: var(--text);
+    }
+    .toggle-desc {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-top: 2px;
+    }
+    .toggle {
+      position: relative;
+      width: 51px; height: 31px;
+      flex-shrink: 0;
+      margin-left: 16px;
+    }
+    .toggle input {
+      opacity: 0; width: 0; height: 0;
+    }
+    .toggle-track {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: #e9e9eb;
+      border-radius: 31px;
+      transition: background var(--transition);
+    }
+    .toggle-track::before {
+      content: '';
+      position: absolute;
+      width: 27px; height: 27px;
+      left: 2px; bottom: 2px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15), 0 1px 1px rgba(0,0,0,0.06);
+      transition: transform var(--transition);
+    }
+    .toggle input:checked + .toggle-track {
+      background: var(--green);
+    }
+    .toggle input:checked + .toggle-track::before {
+      transform: translateX(20px);
+    }
+
+    /* ── Calculated preview ──────────────────────────────────── */
+    .calc-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+    }
+    .calc-item { text-align: center; }
+    .calc-label {
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-tertiary);
+      margin-bottom: 2px;
+    }
+    .calc-value {
+      font-size: 13px;
+      font-family: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* ── Primary button ──────────────────────────────────────── */
+    .btn-primary {
+      display: block;
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 17px;
+      font-weight: 600;
+      font-family: inherit;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all var(--transition);
+      box-shadow: 0 1px 3px rgba(0,113,227,0.3);
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 2px 8px rgba(0,113,227,0.35);
+      transform: translateY(-1px);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ── Progress ────────────────────────────────────────────── */
+    .progress-wrap {
+      display: none;
+      margin-top: 16px;
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+    }
+    .progress-wrap.active { display: block; }
+    .progress-track {
+      height: 4px;
+      background: var(--bg);
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #5ac8fa);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+    .progress-text {
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* ── Error ────────────────────────────────────────────────── */
     .error-msg {
-      display: none; margin-top: 16px; padding: 12px 16px;
-      background: rgba(240,72,72,0.1); border: 1px solid rgba(240,72,72,0.3);
-      border-radius: 8px; color: var(--red); font-size: 14px;
+      display: none;
+      margin-top: 16px;
+      padding: 14px 18px;
+      background: rgba(255, 59, 48, 0.06);
+      border: 1px solid rgba(255, 59, 48, 0.2);
+      border-radius: var(--radius-sm);
+      color: var(--red);
+      font-size: 14px;
+      font-weight: 500;
     }
     .error-msg.active { display: block; }
 
+    /* ── Results ──────────────────────────────────────────────── */
+    .results { display: none; margin-top: 24px; }
+    .results.active { display: block; }
+
+    /* Download button */
+    .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 18px 28px;
+      background: linear-gradient(135deg, var(--green) 0%, #30d158 100%);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+      font-family: inherit;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all var(--transition);
+      box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
+      margin-bottom: 16px;
+    }
+    .download-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(52, 199, 89, 0.35);
+    }
+    .download-btn svg {
+      width: 20px; height: 20px;
+      fill: none; stroke: currentColor; stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* Output thumbnails */
+    .output-thumbs {
+      margin-top: 16px;
+    }
+    .output-thumbs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .output-thumb-card {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .output-thumb-img {
+      width: 100%;
+      display: block;
+      background: #f0f0f0;
+    }
+    .output-thumb-info {
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+    .output-thumb-label {
+      font-weight: 600;
+      color: var(--text);
+    }
+    .output-thumb-meta {
+      color: var(--text-tertiary);
+      margin-top: 2px;
+    }
+    .output-thumb-flipped {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--orange);
+      background: rgba(255,149,0,0.1);
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
+    /* ── Details toggle ──────────────────────────────────────── */
+    .details-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--transition);
+      box-shadow: var(--shadow-sm);
+      margin-top: 16px;
+    }
+    .details-toggle:hover {
+      color: var(--text);
+      background: var(--surface-alt);
+    }
+    .details-toggle .arrow {
+      font-size: 10px;
+      transition: transform 0.25s ease;
+    }
+    .details-toggle.open .arrow {
+      transform: rotate(180deg);
+    }
+    .details-container {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .details-container.open {
+      max-height: 10000px;
+    }
+    .details-inner { padding-top: 16px; }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .result-card h3 {
+      font-size: 13px; font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .stat {
+      padding: 10px 12px;
+      background: var(--bg);
+      border-radius: 6px;
+    }
+    .stat .label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+    }
+    .stat .value {
+      font-size: 13px;
+      font-family: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .checks-list { list-style: none; }
+    .checks-list li {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 0; font-size: 14px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .checks-list li:last-child { border-bottom: none; }
+    .check-icon {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .check-icon.pass { background: rgba(52,199,89,0.12); color: var(--green); }
+    .check-icon.fail { background: rgba(255,59,48,0.12); color: var(--red); }
+
+    /* ── Confirmation dialog ─────────────────────────────────── */
+    .dialog-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .dialog-overlay.active {
+      display: flex;
+    }
+    .dialog-box {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 24px;
+      max-width: 340px;
+      width: 90%;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      animation: dialogIn 0.2s ease;
+    }
+    @keyframes dialogIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .dialog-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .dialog-message {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .dialog-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .dialog-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .dialog-btn-cancel {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .dialog-btn-cancel:hover {
+      background: var(--border-light);
+    }
+    .dialog-btn-confirm {
+      background: var(--red);
+      color: #fff;
+    }
+    .dialog-btn-confirm:hover {
+      background: #e63529;
+    }
+
+    /* ── Responsive ──────────────────────────────────────────── */
     @media (max-width: 600px) {
-      .settings { grid-template-columns: 1fr; }
+      .container { padding: 24px 16px 60px; }
+      header h1 { font-size: 28px; }
+      .form-grid { grid-template-columns: 1fr; }
       .margin-grid { grid-template-columns: 1fr 1fr; }
       .stat-grid { grid-template-columns: 1fr; }
-      .calc-preview { grid-template-columns: 1fr 1fr; }
+      .calc-bar { grid-template-columns: 1fr; }
+      .pages-scroll { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+      .output-thumbs-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     }
   </style>
 </head>
 <body>
+
+  <!-- Confirmation Dialog -->
+  <div class="dialog-overlay" id="dialogOverlay">
+    <div class="dialog-box">
+      <div class="dialog-title" id="dialogTitle">Remove Page?</div>
+      <div class="dialog-message" id="dialogMessage">
+        This page will be excluded from the final PDF.
+      </div>
+      <div class="dialog-actions">
+        <button class="dialog-btn dialog-btn-cancel" id="dialogCancel">Cancel</button>
+        <button class="dialog-btn dialog-btn-confirm" id="dialogConfirm">Remove</button>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <header>
       <h1>PDF Print Production</h1>
-      <p>Safe-margin layout with background-only bleed for print-ready PDFs</p>
+      <p>Prepare presentation slides for print with bleeds, crop marks, and binding layout</p>
     </header>
 
     <!-- Drop Zone -->
     <div class="dropzone" id="dropzone">
-      <div class="dropzone-icon">&#128196;</div>
+      <div class="dropzone-icon">
+        <svg viewBox="0 0 48 48">
+          <path d="M24 32V12M24 12l-8 8M24 12l8 8"/>
+          <path d="M8 32v6a4 4 0 004 4h24a4 4 0 004-4v-6"/>
+        </svg>
+      </div>
       <div class="dropzone-label">Drop your PDF here or click to browse</div>
-      <div class="dropzone-sub">Supports any PDF file</div>
+      <div class="dropzone-sub">Supports any PDF slide deck</div>
       <input type="file" id="fileInput" accept=".pdf">
     </div>
 
     <!-- File info -->
     <div class="file-info" id="fileInfo">
-      <span class="name" id="fileName"></span>
-      <span class="size" id="fileSize"></span>
-      <button class="remove" id="removeFile">&times;</button>
+      <div class="file-icon">PDF</div>
+      <div class="file-details">
+        <div class="file-name" id="fileName"></div>
+        <div class="file-size" id="fileSize"></div>
+      </div>
+      <button class="file-remove" id="removeFile">&times;</button>
     </div>
 
-    <!-- Paper Size -->
-    <div class="section">
-      <div class="section-title">Paper Size</div>
-      <div class="settings">
-        <div class="setting full-width">
-          <label for="paperSize">Target Paper (Landscape)</label>
-          <select id="paperSize">
-            <option value="letter" selected>US Letter (11" x 8.5") &mdash; Standard US</option>
-            <option value="a4">A4 (297mm x 210mm) &mdash; International standard</option>
-            <option value="a5">A5 (210mm x 148mm) &mdash; Half A4, Europe/Asia</option>
-            <option value="b5_jis">B5 JIS (257mm x 182mm) &mdash; Common in Japan</option>
-            <option value="tabloid">Tabloid / Ledger (17" x 11") &mdash; Large US</option>
-          </select>
-          <div class="desc" id="paperDesc">Standard US paper size</div>
-        </div>
+    <!-- Page Thumbnails (after upload) -->
+    <div class="pages-grid" id="pagesGrid">
+      <div class="card">
+        <div class="card-title">Pages</div>
+        <div class="pages-scroll" id="pagesScroll"></div>
       </div>
     </div>
 
-    <!-- Bleed -->
-    <div class="section">
-      <div class="section-title">Bleed</div>
-      <div class="settings">
-        <div class="setting">
-          <label for="bleed">Bleed</label>
-          <input type="number" id="bleed" value="0.125" step="0.0625" min="0.0625" max="0.25">
-          <div class="unit">inches (all sides)</div>
-        </div>
-      </div>
-    </div>
+    <!-- Settings -->
+    <div class="card" id="settingsCard" style="display:none;">
+      <div class="card-title">Layout Settings</div>
 
-    <!-- Background Style -->
-    <div class="section">
-      <div class="section-title">Background</div>
-      <div class="settings">
-        <div class="setting full-width">
-          <label for="bgStyle">Bleed Background Style</label>
-          <select id="bgStyle">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="trimWidth">Trim Width</label>
+          <input class="form-input" type="number" id="trimWidth" value="10.5" step="0.125" min="3">
+          <div class="form-hint">inches</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="bleed">Bleed</label>
+          <input class="form-input" type="number" id="bleed" value="0.125" step="0.0625" min="0.0625" max="0.5">
+          <div class="form-hint">inches (all sides)</div>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="bgStyle">Background</label>
+          <select class="form-select" id="bgStyle">
             <option value="auto" selected>Auto-detect from slide</option>
-            <option value="blue_gradient">Blue gradient (dark navy &rarr; blue)</option>
+            <option value="blue_gradient">Blue gradient (dark navy to blue)</option>
           </select>
-          <div class="desc" id="bgDesc">Extends detected slide background into bleed area</div>
         </div>
       </div>
-    </div>
 
-    <!-- Safe Margins -->
-    <div class="section">
-      <div class="section-title">Safe Margins (inside trim)</div>
-      <div class="margin-grid">
-        <div class="setting">
-          <label for="marginTop">Top (binding)</label>
-          <input type="number" id="marginTop" value="1.5" step="0.125" min="0.25">
-          <div class="unit">inches</div>
-        </div>
-        <div class="setting">
-          <label for="marginBottom">Bottom</label>
-          <input type="number" id="marginBottom" value="0.5" step="0.125" min="0.25">
-          <div class="unit">inches</div>
-        </div>
-        <div class="setting">
-          <label for="marginLeft">Left</label>
-          <input type="number" id="marginLeft" value="0.5" step="0.125" min="0.25">
-          <div class="unit">inches</div>
-        </div>
-        <div class="setting">
-          <label for="marginRight">Right</label>
-          <input type="number" id="marginRight" value="0.5" step="0.125" min="0.25">
-          <div class="unit">inches</div>
+      <!-- Margins -->
+      <div style="margin-top: 20px;">
+        <div class="card-title">Safe Margins</div>
+        <div class="margin-grid">
+          <div class="form-group">
+            <label class="form-label" for="marginTop">Top</label>
+            <input class="form-input" type="number" id="marginTop" value="1.5" step="0.125" min="0.25">
+            <div class="form-hint">binding</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="marginBottom">Bottom</label>
+            <input class="form-input" type="number" id="marginBottom" value="0.5" step="0.125" min="0.25">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="marginLeft">Left</label>
+            <input class="form-input" type="number" id="marginLeft" value="0.5" step="0.125" min="0.25">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="marginRight">Right</label>
+            <input class="form-input" type="number" id="marginRight" value="0.5" step="0.125" min="0.25">
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Calculated dimensions preview -->
-    <div class="calc-preview" id="calcPreview">
-      <div class="calc-item">
-        <div class="calc-label">Paper</div>
-        <div class="calc-value" id="calcPaper">11.000" x 8.500"</div>
+      <!-- Toggles -->
+      <div style="margin-top: 20px;">
+        <div class="card-title">Binding Options</div>
+
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label-text">Flip alternate pages</div>
+            <div class="toggle-desc">Rotate every other page 180 degrees for double-sided spiral/comb binding</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="flipEvenPages" checked>
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row" style="margin-top: 16px;">
+          <div>
+            <div class="toggle-label-text">Insert blank page after cover</div>
+            <div class="toggle-desc">Adds a white page between the cover and content</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="insertBlank">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
       </div>
-      <div class="calc-item">
-        <div class="calc-label">Trim</div>
-        <div class="calc-value" id="calcTrim">--</div>
-      </div>
-      <div class="calc-item">
-        <div class="calc-label">Safe Area</div>
-        <div class="calc-value" id="calcSafe">--</div>
-      </div>
-      <div class="calc-item">
-        <div class="calc-label">Media</div>
-        <div class="calc-value" id="calcMedia">--</div>
+
+      <!-- Calc preview -->
+      <div class="calc-bar" id="calcBar">
+        <div class="calc-item">
+          <div class="calc-label">Trim Width</div>
+          <div class="calc-value" id="calcTrimW">10.500"</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-label">Trim Height</div>
+          <div class="calc-value" id="calcTrimH">auto</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-label">Bleed</div>
+          <div class="calc-value" id="calcBleed">0.125"</div>
+        </div>
       </div>
     </div>
 
     <!-- Process button -->
-    <button class="btn" id="processBtn" disabled>Process PDF</button>
+    <button class="btn-primary" id="processBtn" disabled style="margin-top:16px;">
+      Generate Print-Ready PDF
+    </button>
 
     <!-- Progress -->
     <div class="progress-wrap" id="progressWrap">
-      <div class="progress-bar" id="progressBar"></div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
       <div class="progress-text" id="progressText">Uploading...</div>
     </div>
 
@@ -326,153 +867,251 @@
     <!-- Results -->
     <div class="results" id="results">
       <div id="downloadArea"></div>
+      <div id="outputThumbs"></div>
       <div id="detailsArea"></div>
     </div>
   </div>
 
   <script>
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('fileInput');
-    const fileInfo = document.getElementById('fileInfo');
-    const fileName = document.getElementById('fileName');
-    const fileSize = document.getElementById('fileSize');
-    const removeFile = document.getElementById('removeFile');
-    const processBtn = document.getElementById('processBtn');
-    const progressWrap = document.getElementById('progressWrap');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-    const errorMsg = document.getElementById('errorMsg');
-    const results = document.getElementById('results');
-    const downloadArea = document.getElementById('downloadArea');
-    const detailsArea = document.getElementById('detailsArea');
+    // ── DOM refs ────────────────────────────────────────────────────────
+    const $ = id => document.getElementById(id);
+    const dropzone = $('dropzone');
+    const fileInput = $('fileInput');
+    const fileInfo = $('fileInfo');
+    const fileName = $('fileName');
+    const fileSize = $('fileSize');
+    const removeFile = $('removeFile');
+    const pagesGrid = $('pagesGrid');
+    const pagesScroll = $('pagesScroll');
+    const settingsCard = $('settingsCard');
+    const processBtn = $('processBtn');
+    const progressWrap = $('progressWrap');
+    const progressBar = $('progressBar');
+    const progressText = $('progressText');
+    const errorMsg = $('errorMsg');
+    const results = $('results');
+    const downloadArea = $('downloadArea');
+    const outputThumbs = $('outputThumbs');
+    const detailsArea = $('detailsArea');
 
-    const paperSizeEl = document.getElementById('paperSize');
-    const bleedEl = document.getElementById('bleed');
-    const bgStyleEl = document.getElementById('bgStyle');
-    const bgDescEl = document.getElementById('bgDesc');
-    const marginTopEl = document.getElementById('marginTop');
-    const marginBottomEl = document.getElementById('marginBottom');
-    const marginLeftEl = document.getElementById('marginLeft');
-    const marginRightEl = document.getElementById('marginRight');
-    const paperDescEl = document.getElementById('paperDesc');
-    const calcPaper = document.getElementById('calcPaper');
-    const calcTrim = document.getElementById('calcTrim');
-    const calcSafe = document.getElementById('calcSafe');
-    const calcMedia = document.getElementById('calcMedia');
+    const trimWidthEl = $('trimWidth');
+    const bleedEl = $('bleed');
+    const bgStyleEl = $('bgStyle');
+    const marginTopEl = $('marginTop');
+    const marginBottomEl = $('marginBottom');
+    const marginLeftEl = $('marginLeft');
+    const marginRightEl = $('marginRight');
+    const flipEvenEl = $('flipEvenPages');
+    const insertBlankEl = $('insertBlank');
+    const calcTrimW = $('calcTrimW');
+    const calcTrimH = $('calcTrimH');
+    const calcBleed = $('calcBleed');
+
+    const dialogOverlay = $('dialogOverlay');
+    const dialogTitle = $('dialogTitle');
+    const dialogMessage = $('dialogMessage');
+    const dialogCancel = $('dialogCancel');
+    const dialogConfirm = $('dialogConfirm');
 
     let selectedFile = null;
+    let jobId = null;
+    let uploadedFilename = null;
+    let previewPages = [];    // from /api/preview
+    let deletedIndices = new Set();
 
-    const PAPER_DESCRIPTIONS = {
-      letter: 'Standard US paper size',
-      a4: 'International standard (ISO 216)',
-      a5: 'Half of A4, common in Europe & Asia',
-      b5_jis: 'Common in Japan for books & magazines',
-      tabloid: 'Large US format, 2x Letter',
-    };
-
-    // ── Drag & drop ──────────────────────────────────────────────────────
+    // ── Drag & drop / file select ──────────────────────────────────────
     dropzone.addEventListener('click', () => fileInput.click());
     dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
     dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
     dropzone.addEventListener('drop', e => {
       e.preventDefault();
       dropzone.classList.remove('dragover');
-      const files = e.dataTransfer.files;
-      if (files.length && files[0].type === 'application/pdf') setFile(files[0]);
+      const f = e.dataTransfer.files;
+      if (f.length && f[0].type === 'application/pdf') handleFile(f[0]);
     });
     fileInput.addEventListener('change', () => {
-      if (fileInput.files.length) setFile(fileInput.files[0]);
+      if (fileInput.files.length) handleFile(fileInput.files[0]);
     });
     removeFile.addEventListener('click', clearFile);
 
-    function setFile(file) {
+    function handleFile(file) {
       selectedFile = file;
       fileName.textContent = file.name;
       fileSize.textContent = formatSize(file.size);
       fileInfo.classList.add('active');
-      processBtn.disabled = false;
       results.classList.remove('active');
       errorMsg.classList.remove('active');
+      uploadPreview(file);
     }
+
     function clearFile() {
       selectedFile = null;
+      jobId = null;
+      uploadedFilename = null;
+      previewPages = [];
+      deletedIndices.clear();
       fileInput.value = '';
       fileInfo.classList.remove('active');
+      pagesGrid.classList.remove('active');
+      settingsCard.style.display = 'none';
       processBtn.disabled = true;
       results.classList.remove('active');
       errorMsg.classList.remove('active');
     }
+
     function formatSize(bytes) {
       if (bytes < 1024) return bytes + ' B';
       if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       return (bytes / 1048576).toFixed(1) + ' MB';
     }
 
-    // ── Background style description ────────────────────────────────────
-    const BG_DESCRIPTIONS = {
-      auto: 'Extends detected slide background into bleed area',
-      blue_gradient: 'Vertical gradient from dark navy to blue fills the bleed',
-    };
-    bgStyleEl.addEventListener('change', () => {
-      bgDescEl.textContent = BG_DESCRIPTIONS[bgStyleEl.value] || '';
+    // ── Upload & preview ───────────────────────────────────────────────
+    async function uploadPreview(file) {
+      const form = new FormData();
+      form.append('file', file);
+
+      processBtn.disabled = true;
+      progressWrap.classList.add('active');
+      progressBar.style.width = '30%';
+      progressText.textContent = 'Uploading...';
+
+      try {
+        const resp = await fetch('/api/preview', { method: 'POST', body: form });
+        const data = await resp.json();
+        if (data.error) { showError(data.error); return; }
+
+        progressBar.style.width = '100%';
+        progressText.textContent = 'Ready';
+        setTimeout(() => progressWrap.classList.remove('active'), 800);
+
+        jobId = data.job_id;
+        uploadedFilename = data.filename;
+        previewPages = data.pages;
+        deletedIndices.clear();
+
+        renderPreviewThumbs(data.thumbnails, data.pages);
+        settingsCard.style.display = '';
+        processBtn.disabled = false;
+        updateCalcPreview();
+      } catch (err) {
+        showError(err.message || 'Upload failed');
+      }
+    }
+
+    function renderPreviewThumbs(thumbs, pages) {
+      pagesScroll.innerHTML = '';
+      pages.forEach((pg, i) => {
+        const card = document.createElement('div');
+        card.className = 'page-card';
+        card.dataset.index = i;
+        card.innerHTML = `
+          <div class="page-thumb">
+            <img class="page-thumb-img" src="data:image/png;base64,${thumbs[i]}" alt="Page ${i+1}">
+            <span class="page-badge">${i + 1}</span>
+            <button class="page-delete-btn" title="Remove page" data-index="${i}">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <path d="M2 3.5h10M5.5 3.5V2a1 1 0 011-1h1a1 1 0 011 1v1.5M11 3.5l-.5 8a1.5 1.5 0 01-1.5 1.5H5A1.5 1.5 0 013.5 11.5L3 3.5M5.5 6v4M8.5 6v4"/>
+              </svg>
+            </button>
+          </div>
+          <div class="page-info">
+            <span class="page-label">Page ${i+1}</span>
+            <span class="page-dims">${pg.width_in}" x ${pg.height_in}"</span>
+            <span class="page-deleted-label">Removed</span>
+          </div>`;
+        pagesScroll.appendChild(card);
+      });
+
+      // Wire up delete buttons
+      pagesScroll.querySelectorAll('.page-delete-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const idx = parseInt(btn.dataset.index);
+          const card = pagesScroll.querySelector(`.page-card[data-index="${idx}"]`);
+          if (deletedIndices.has(idx)) {
+            // Restore
+            deletedIndices.delete(idx);
+            card.classList.remove('deleted');
+          } else {
+            // Show confirmation
+            showDeleteDialog(idx, card);
+          }
+        });
+      });
+
+      pagesGrid.classList.add('active');
+    }
+
+    // ── Delete dialog ──────────────────────────────────────────────────
+    let pendingDeleteIdx = null;
+    let pendingDeleteCard = null;
+
+    function showDeleteDialog(idx, card) {
+      pendingDeleteIdx = idx;
+      pendingDeleteCard = card;
+      dialogTitle.textContent = `Remove Page ${idx + 1}?`;
+      dialogMessage.textContent = 'This page will be excluded from the final print-ready PDF. You can restore it by clicking the page again.';
+      dialogOverlay.classList.add('active');
+    }
+
+    dialogCancel.addEventListener('click', () => {
+      dialogOverlay.classList.remove('active');
+      pendingDeleteIdx = null;
+      pendingDeleteCard = null;
     });
 
-    // ── Settings change → update calc preview ────────────────────────────
-    paperSizeEl.addEventListener('change', () => {
-      paperDescEl.textContent = PAPER_DESCRIPTIONS[paperSizeEl.value] || '';
-      updateCalcPreview();
+    dialogConfirm.addEventListener('click', () => {
+      if (pendingDeleteIdx !== null && pendingDeleteCard) {
+        deletedIndices.add(pendingDeleteIdx);
+        pendingDeleteCard.classList.add('deleted');
+      }
+      dialogOverlay.classList.remove('active');
+      pendingDeleteIdx = null;
+      pendingDeleteCard = null;
     });
-    [bleedEl, marginTopEl, marginBottomEl, marginLeftEl, marginRightEl]
+
+    dialogOverlay.addEventListener('click', e => {
+      if (e.target === dialogOverlay) {
+        dialogOverlay.classList.remove('active');
+        pendingDeleteIdx = null;
+        pendingDeleteCard = null;
+      }
+    });
+
+    // ── Calc preview update ────────────────────────────────────────────
+    [trimWidthEl, bleedEl, marginTopEl, marginBottomEl, marginLeftEl, marginRightEl]
       .forEach(el => el.addEventListener('input', updateCalcPreview));
 
     function updateCalcPreview() {
-      const bleed = parseFloat(bleedEl.value) || 0.125;
-      fetch(`/api/paper-sizes?bleed=${bleed}`)
-        .then(r => r.json())
-        .then(data => {
-          const ps = data[paperSizeEl.value];
-          if (!ps) return;
-          const mt = parseFloat(marginTopEl.value) || 1.5;
-          const mb = parseFloat(marginBottomEl.value) || 0.5;
-          const ml = parseFloat(marginLeftEl.value) || 0.5;
-          const mr = parseFloat(marginRightEl.value) || 0.5;
-          const safeW = ps.trim_width_in - ml - mr;
-          const safeH = ps.trim_height_in - mt - mb;
-          calcPaper.textContent = `${ps.paper_width_in.toFixed(3)}" x ${ps.paper_height_in.toFixed(3)}"`;
-          calcTrim.textContent = `${ps.trim_width_in.toFixed(3)}" x ${ps.trim_height_in.toFixed(3)}"`;
-          calcSafe.textContent = safeW > 0 && safeH > 0
-            ? `${safeW.toFixed(3)}" x ${safeH.toFixed(3)}"`
-            : 'margins too large';
-          const mediaW = ps.paper_width_in;
-          const mediaH = ps.paper_height_in;
-          calcMedia.textContent = `${mediaW.toFixed(3)}" x ${mediaH.toFixed(3)}"`;
-        })
-        .catch(() => {
-          calcTrim.textContent = '--';
-          calcSafe.textContent = '--';
-          calcMedia.textContent = '--';
-        });
+      const tw = parseFloat(trimWidthEl.value) || 10.5;
+      const bl = parseFloat(bleedEl.value) || 0.125;
+      calcTrimW.textContent = tw.toFixed(3) + '"';
+      calcBleed.textContent = bl.toFixed(3) + '"';
+      calcTrimH.textContent = 'auto';
     }
-    updateCalcPreview();
 
-    // ── Process ──────────────────────────────────────────────────────────
+    // ── Process ────────────────────────────────────────────────────────
     processBtn.addEventListener('click', async () => {
-      if (!selectedFile) return;
+      if (!jobId) return;
 
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('paper_size', paperSizeEl.value);
-      formData.append('bleed', bleedEl.value);
-      formData.append('margin_top', marginTopEl.value);
-      formData.append('margin_bottom', marginBottomEl.value);
-      formData.append('margin_left', marginLeftEl.value);
-      formData.append('margin_right', marginRightEl.value);
-      formData.append('bg_style', bgStyleEl.value);
+      const form = new FormData();
+      form.append('job_id', jobId);
+      form.append('filename', uploadedFilename || 'output.pdf');
+      form.append('trim_width', trimWidthEl.value);
+      form.append('bleed', bleedEl.value);
+      form.append('margin_top', marginTopEl.value);
+      form.append('margin_bottom', marginBottomEl.value);
+      form.append('margin_left', marginLeftEl.value);
+      form.append('margin_right', marginRightEl.value);
+      form.append('bg_style', bgStyleEl.value);
+      form.append('flip_even_pages', flipEvenEl.checked ? 'true' : 'false');
+      form.append('insert_blank_after_cover', insertBlankEl.checked ? 'true' : 'false');
+      form.append('delete_pages', JSON.stringify([...deletedIndices]));
 
       processBtn.disabled = true;
       progressWrap.classList.add('active');
       progressBar.style.width = '0%';
-      progressText.textContent = 'Uploading...';
+      progressText.textContent = 'Processing...';
       errorMsg.classList.remove('active');
       results.classList.remove('active');
 
@@ -483,28 +1122,27 @@
             if (e.lengthComputable) {
               const pct = Math.round((e.loaded / e.total) * 50);
               progressBar.style.width = pct + '%';
-              progressText.textContent = pct < 50 ? 'Uploading...' : 'Processing...';
+              progressText.textContent = pct < 50 ? 'Sending...' : 'Processing...';
             }
           });
           xhr.addEventListener('load', () => {
             progressBar.style.width = '100%';
-            progressText.textContent = 'Done!';
+            progressText.textContent = 'Done';
             try { resolve(JSON.parse(xhr.responseText)); }
             catch { reject(new Error('Invalid response')); }
           });
           xhr.addEventListener('error', () => reject(new Error('Network error')));
           xhr.open('POST', '/api/process');
-          xhr.send(formData);
+          xhr.send(form);
         });
 
-        progressBar.style.width = '100%';
         if (response.error) { showError(response.error); return; }
         renderResults(response);
       } catch (err) {
         showError(err.message || 'Something went wrong');
       } finally {
         processBtn.disabled = false;
-        setTimeout(() => progressWrap.classList.remove('active'), 1500);
+        setTimeout(() => progressWrap.classList.remove('active'), 1200);
       }
     });
 
@@ -514,35 +1152,56 @@
       progressWrap.classList.remove('active');
     }
 
-    // ── Render results ───────────────────────────────────────────────────
+    // ── Render results ─────────────────────────────────────────────────
     function renderResults(data) {
       const totalPages = data.pages.length;
       const allPassed = data.verification.every(v => v.all_pass);
       const dlName = encodeURIComponent(data.filename || 'output');
 
-      // Download button at top
+      // Download button
       downloadArea.innerHTML = `
         <a class="download-btn" href="/api/download/${data.job_id}?name=${dlName}">
-          &#11015; Download Print-Ready PDF
-        </a>
-        <button class="details-toggle" id="detailsToggle">
-          <span>Show processing details (${totalPages} page${totalPages !== 1 ? 's' : ''}${allPassed ? ', all checks passed' : ', issues found'})</span>
-          <span class="arrow">&#9660;</span>
-        </button>`;
+          <svg viewBox="0 0 24 24"><path d="M12 3v14M12 17l-5-5M12 17l5-5"/><path d="M5 20h14"/></svg>
+          Download Print-Ready PDF
+        </a>`;
 
-      // Collapsed processing details
-      let html = '<div class="details-container" id="detailsContainer"><div class="details-inner">';
+      // Output thumbnails
+      let thumbHtml = '<div class="card"><div class="card-title">Output Preview</div><div class="output-thumbs-grid">';
+      data.pages.forEach((pg, i) => {
+        const thumb = data.thumbnails[i];
+        const flipped = pg.flipped;
+        const isBlank = pg.is_blank;
+        thumbHtml += `
+          <div class="output-thumb-card">
+            <img class="output-thumb-img" src="data:image/png;base64,${thumb}" alt="Page ${pg.page}">
+            <div class="output-thumb-info">
+              <div class="output-thumb-label">Page ${pg.page}${isBlank ? ' (Blank)' : ''}</div>
+              <div class="output-thumb-meta">${pg.trim_size}</div>
+              ${flipped ? '<div class="output-thumb-flipped">Flipped 180&deg;</div>' : ''}
+            </div>
+          </div>`;
+      });
+      thumbHtml += '</div></div>';
+      outputThumbs.innerHTML = thumbHtml;
+
+      // Details toggle
+      let html = `
+        <button class="details-toggle" id="detailsToggle">
+          <span>Processing details (${totalPages} page${totalPages !== 1 ? 's' : ''}${allPassed ? ' \u2014 all checks passed' : ' \u2014 issues found'})</span>
+          <span class="arrow">&#9660;</span>
+        </button>
+        <div class="details-container" id="detailsContainer"><div class="details-inner">`;
 
       data.pages.forEach(pg => {
         html += `
           <div class="result-card">
-            <h3>Page ${pg.page}</h3>
+            <h3>Page ${pg.page}${pg.is_blank ? ' (Blank)' : ''}</h3>
             <div class="stat-grid">
               <div class="stat"><div class="label">Original</div><div class="value">${pg.original_size}</div></div>
-              <div class="stat"><div class="label">Trim Size</div><div class="value">${pg.trim_size}</div></div>
-              <div class="stat"><div class="label">Media Size</div><div class="value">${pg.media_size}</div></div>
+              <div class="stat"><div class="label">Trim</div><div class="value">${pg.trim_size}</div></div>
+              <div class="stat"><div class="label">Media</div><div class="value">${pg.media_size}</div></div>
               <div class="stat"><div class="label">Safe Area</div><div class="value">${pg.safe_area}</div></div>
-              <div class="stat"><div class="label">Scale Factor</div><div class="value">${pg.scale_factor}</div></div>
+              <div class="stat"><div class="label">Scale</div><div class="value">${pg.scale_factor}</div></div>
               <div class="stat"><div class="label">Background</div><div class="value">${pg.background_color}</div></div>
             </div>
           </div>`;
@@ -551,14 +1210,13 @@
       data.verification.forEach(v => {
         html += `
           <div class="result-card">
-            <h3>Page ${v.page} Verification ${v.all_pass ? '&mdash; All Passed' : '&mdash; Issues Found'}</h3>
+            <h3>Page ${v.page} Verification ${v.all_pass ? '\u2014 Passed' : '\u2014 Issues'}</h3>
             <ul class="checks-list">
               ${v.checks.map(c => `
                 <li>
-                  <span class="check-icon ${c.pass ? 'pass' : 'fail'}">${c.pass ? '&#10003;' : '&#10005;'}</span>
+                  <span class="check-icon ${c.pass ? 'pass' : 'fail'}">${c.pass ? '\u2713' : '\u2717'}</span>
                   ${c.label}
-                </li>
-              `).join('')}
+                </li>`).join('')}
             </ul>
           </div>`;
       });
@@ -567,9 +1225,12 @@
       detailsArea.innerHTML = html;
       results.classList.add('active');
 
-      document.getElementById('detailsToggle').addEventListener('click', function() {
+      // Scroll to results
+      downloadArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      $('detailsToggle').addEventListener('click', function() {
         this.classList.toggle('open');
-        document.getElementById('detailsContainer').classList.toggle('open');
+        $('detailsContainer').classList.toggle('open');
       });
     }
   </script>
