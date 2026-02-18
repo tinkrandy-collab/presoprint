@@ -733,7 +733,7 @@
       stroke-linecap: round; stroke-linejoin: round;
     }
 
-    /* ── Flip book viewer overlay ────────────────────────────── */
+    /* ── Wire-O Flip Book – Table-top View ───────────────────── */
     .flipbook-overlay {
       display: none;
       position: fixed;
@@ -792,49 +792,108 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      max-width: 85vw;
-      max-height: calc(100vh - 140px);
+      position: relative;
     }
-    .flipbook-binding {
-      height: 24px;
-      background: linear-gradient(180deg, #4a4a4c 0%, #2c2c2e 40%, #1a1a1c 100%);
-      border-radius: 8px 8px 0 0;
+
+    /* Top page – flipped back over the binding */
+    .flipbook-top-wrap {
+      line-height: 0;
+      position: relative;
+    }
+    .flipbook-top-wrap img {
+      display: block;
+      border-radius: 3px 3px 0 0;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
+    }
+    .flipbook-top-wrap.closed { display: none; }
+    .flipbook-top-wrap::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 20px;
+      background: linear-gradient(to top, rgba(0,0,0,0.12), transparent);
+      pointer-events: none;
+    }
+
+    /* Wire-O binding strip */
+    .flipbook-wireo {
+      position: relative;
+      z-index: 10;
+      height: 32px;
+    }
+    .flipbook-wireo-spine {
+      height: 100%;
+      background: linear-gradient(180deg,
+        #505054 0%, #3a3a3c 20%, #2a2a2c 45%,
+        #1a1a1c 55%, #2a2a2c 80%, #505054 100%);
+      border-radius: 3px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 20px;
-      padding: 0 28px;
-      position: relative;
-      z-index: 5;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-      min-width: 200px;
+      justify-content: space-evenly;
+      padding: 0 10px;
+      box-shadow:
+        0 3px 10px rgba(0,0,0,0.5),
+        0 -3px 10px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        inset 0 -1px 0 rgba(255,255,255,0.1);
     }
-    .flipbook-ring {
-      width: 12px;
-      height: 12px;
+
+    /* Double-loop wire ring */
+    .wireo-ring {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      flex-shrink: 0;
+    }
+    .wireo-ring-loop {
+      width: 10px;
+      height: 11px;
+      border: 1.8px solid #707075;
       border-radius: 50%;
-      border: 2px solid #7a7a7e;
-      background: transparent;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+      background: linear-gradient(145deg, #c8c8cc 0%, #909095 40%, #b0b0b5 100%);
+      box-shadow:
+        0 0.5px 1px rgba(0,0,0,0.4),
+        inset 0 0.5px 0.5px rgba(255,255,255,0.35);
+      position: relative;
     }
-    .flipbook-page-area {
+    .wireo-ring-loop::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #48484a 0%, #2c2c2e 100%);
+    }
+
+    /* Bottom page – current page */
+    .flipbook-bottom-wrap {
+      line-height: 0;
       position: relative;
       perspective: 2000px;
-      line-height: 0;
     }
-    .flipbook-static {
+    .flipbook-bottom-wrap > img.flipbook-page-img {
       display: block;
-      max-width: 85vw;
-      max-height: calc(100vh - 200px);
       border-radius: 0 0 3px 3px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
     }
+    .flipbook-bottom-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 20px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.12), transparent);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Flip animation layer */
     .flipbook-flip-layer {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       transform-style: preserve-3d;
       transform-origin: top center;
-      z-index: 3;
+      z-index: 5;
+      display: none;
     }
     .flipbook-flip-front,
     .flipbook-flip-back {
@@ -851,20 +910,21 @@
     }
     .flipbook-flip-back {
       transform: rotateX(180deg);
-      background: linear-gradient(180deg, #e8e8e8 0%, #f4f4f4 30%, #eaeaea 100%);
+      background: linear-gradient(180deg, #f0f0f0 0%, #e8e8e8 50%, #f4f4f4 100%);
       border-radius: 0 0 3px 3px;
-      box-shadow: inset 0 0 30px rgba(0,0,0,0.05);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
     }
-    .flipbook-shadow {
+    .flipbook-shadow-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.04) 100%);
+      background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 100%);
       opacity: 0;
       transition: opacity 0.3s ease;
       pointer-events: none;
       border-radius: 0 0 3px 3px;
       z-index: 1;
     }
+
     .flipbook-loading {
       color: rgba(255,255,255,0.6);
       font-size: 15px;
@@ -898,10 +958,8 @@
     @media (max-width: 600px) {
       .flipbook-stage { padding: 72px 12px 40px; gap: 12px; }
       .flipbook-nav { width: 36px; height: 36px; font-size: 18px; }
-      .flipbook-book { max-width: 92vw; }
-      .flipbook-static { max-width: 92vw; }
-      .flipbook-binding { height: 20px; gap: 14px; padding: 0 16px; }
-      .flipbook-ring { width: 10px; height: 10px; }
+      .flipbook-wireo { height: 26px; }
+      .wireo-ring-loop { width: 8px; height: 9px; }
     }
   </style>
 </head>
@@ -921,24 +979,32 @@
     </div>
   </div>
 
-  <!-- Flip Book Viewer -->
+  <!-- Wire-O Flip Book Viewer -->
   <div class="flipbook-overlay" id="flipbookOverlay">
     <div class="flipbook-header">
-      <div class="flipbook-title">Bound Preview</div>
+      <div class="flipbook-title">Wire-O Bound Preview</div>
       <div class="flipbook-counter" id="flipbookCounter"></div>
       <button class="flipbook-close" id="flipbookClose">&times;</button>
     </div>
     <div class="flipbook-stage" id="flipbookStage">
       <button class="flipbook-nav" id="flipbookPrev" disabled>&#8249;</button>
       <div class="flipbook-book" id="flipbookBook">
-        <div class="flipbook-binding" id="flipbookBinding"></div>
-        <div class="flipbook-page-area" id="flipbookPageArea" style="display:none;">
-          <img class="flipbook-static" id="flipbookStatic" src="" alt="">
-          <div class="flipbook-flip-layer" id="flipbookFlipLayer" style="display:none;">
+        <!-- Top: flipped-back page -->
+        <div class="flipbook-top-wrap closed" id="flipbookTopWrap">
+          <img id="flipbookTopImg" src="" alt="Flipped page">
+        </div>
+        <!-- Wire-O binding -->
+        <div class="flipbook-wireo">
+          <div class="flipbook-wireo-spine" id="flipbookSpine"></div>
+        </div>
+        <!-- Bottom: current page -->
+        <div class="flipbook-bottom-wrap" id="flipbookBottomWrap">
+          <img class="flipbook-page-img" id="flipbookBottomImg" src="" alt="Current page">
+          <div class="flipbook-flip-layer" id="flipbookFlipLayer">
             <div class="flipbook-flip-front"><img id="flipbookFlipFront" src="" alt=""></div>
             <div class="flipbook-flip-back"></div>
           </div>
-          <div class="flipbook-shadow" id="flipbookShadow"></div>
+          <div class="flipbook-shadow-overlay" id="flipbookShadow"></div>
         </div>
         <div class="flipbook-loading" id="flipbookLoading">Loading preview...</div>
       </div>
@@ -1464,14 +1530,18 @@
         $('detailsContainer').classList.toggle('open');
       });
     }
-    // ── Flip book viewer (3D page flip with binding) ─────────────────
+
+    // ── Wire-O Flip Book Viewer (table-top view) ─────────────────────
     let flipbookThumbs = [];
-    let flipbookIdx = 0;
+    let flipbookIdx = 0;     // 0 = closed (cover only), 1+ = open at that page
     let flipState = 'idle';
     const FLIP_MS = 600;
 
     const flipbookOverlay = $('flipbookOverlay');
-    const flipbookStatic = $('flipbookStatic');
+    const flipbookTopWrap = $('flipbookTopWrap');
+    const flipbookTopImg = $('flipbookTopImg');
+    const flipbookBottomWrap = $('flipbookBottomWrap');
+    const flipbookBottomImg = $('flipbookBottomImg');
     const flipbookFlipLayer = $('flipbookFlipLayer');
     const flipbookFlipFront = $('flipbookFlipFront');
     const flipbookShadow = $('flipbookShadow');
@@ -1480,30 +1550,44 @@
     const flipbookNext = $('flipbookNext');
     const flipbookClose = $('flipbookClose');
     const flipbookLoading = $('flipbookLoading');
-    const flipbookPageArea = $('flipbookPageArea');
+    const flipbookSpine = $('flipbookSpine');
     const flipbookStage = $('flipbookStage');
-    const flipbookBinding = $('flipbookBinding');
 
-    function buildBindingRings() {
-      const w = flipbookStatic.offsetWidth || 400;
-      flipbookBinding.style.width = w + 'px';
-      flipbookBinding.innerHTML = '';
-      const ringCount = Math.max(3, Math.floor(w / 40));
+    function buildWireoRings() {
+      const w = flipbookBottomImg.offsetWidth || 400;
+      flipbookSpine.style.width = w + 'px';
+      flipbookSpine.innerHTML = '';
+      const ringCount = Math.max(4, Math.floor(w / 36));
       for (let i = 0; i < ringCount; i++) {
         const ring = document.createElement('div');
-        ring.className = 'flipbook-ring';
-        flipbookBinding.appendChild(ring);
+        ring.className = 'wireo-ring';
+        ring.innerHTML = '<div class="wireo-ring-loop"></div><div class="wireo-ring-loop"></div>';
+        flipbookSpine.appendChild(ring);
       }
+    }
+
+    function setPageSizeConstraints() {
+      const maxW = Math.min(window.innerWidth * 0.7, 800);
+      // When open (two pages visible), each page gets half the available height
+      const isOpen = flipbookIdx > 0;
+      const maxH = isOpen
+        ? (window.innerHeight - 180) / 2
+        : (window.innerHeight - 160);
+      flipbookBottomImg.style.maxWidth = maxW + 'px';
+      flipbookBottomImg.style.maxHeight = maxH + 'px';
+      flipbookTopImg.style.maxWidth = maxW + 'px';
+      flipbookTopImg.style.maxHeight = maxH + 'px';
     }
 
     async function openFlipbook() {
       if (!jobId) return;
 
       flipbookOverlay.classList.add('active');
-      flipbookPageArea.style.display = 'none';
+      flipbookTopWrap.classList.add('closed');
+      flipbookBottomWrap.style.display = 'none';
       flipbookLoading.style.display = '';
-      flipbookBinding.style.width = '200px';
-      flipbookBinding.innerHTML = '';
+      flipbookSpine.style.width = '200px';
+      flipbookSpine.innerHTML = '';
       flipbookCounter.textContent = '';
       flipbookPrev.disabled = true;
       flipbookNext.disabled = true;
@@ -1521,37 +1605,51 @@
         flipbookThumbs = data.thumbnails;
         flipbookIdx = 0;
         flipbookLoading.style.display = 'none';
-        flipbookPageArea.style.display = '';
+        flipbookBottomWrap.style.display = '';
         flipbookFlipLayer.style.display = 'none';
 
-        flipbookStatic.onload = function() {
-          buildBindingRings();
-          flipbookStatic.onload = null;
+        setPageSizeConstraints();
+
+        flipbookBottomImg.onload = function() {
+          buildWireoRings();
+          flipbookBottomImg.onload = null;
         };
-        flipbookStatic.src = 'data:image/png;base64,' + flipbookThumbs[0];
-        updateFlipbookNav();
+        flipbookBottomImg.src = 'data:image/png;base64,' + flipbookThumbs[0];
+        updateFlipbookState();
       } catch (err) {
         flipbookOverlay.classList.remove('active');
         showError('Failed to load flip book preview');
       }
     }
 
-    function updateFlipbookNav() {
-      flipbookCounter.textContent = (flipbookIdx + 1) + ' / ' + flipbookThumbs.length;
+    function updateFlipbookState() {
+      const total = flipbookThumbs.length;
+      if (flipbookIdx === 0) {
+        flipbookCounter.textContent = 'Cover \u2014 ' + total + ' pages';
+        flipbookTopWrap.classList.add('closed');
+      } else {
+        flipbookCounter.textContent = 'Page ' + (flipbookIdx + 1) + ' of ' + total;
+        flipbookTopWrap.classList.remove('closed');
+      }
       flipbookPrev.disabled = flipbookIdx === 0 || flipState !== 'idle';
-      flipbookNext.disabled = flipbookIdx === flipbookThumbs.length - 1 || flipState !== 'idle';
+      flipbookNext.disabled = flipbookIdx >= total - 1 || flipState !== 'idle';
     }
 
     function flipForward() {
       if (flipState !== 'idle' || flipbookIdx >= flipbookThumbs.length - 1) return;
       flipState = 'flipping';
-      const nextIdx = flipbookIdx + 1;
+      const curIdx = flipbookIdx;
+      const nextIdx = curIdx + 1;
 
-      // Front of flipping page = current page, static underneath = next page
-      flipbookFlipFront.src = flipbookStatic.src;
-      flipbookStatic.src = 'data:image/png;base64,' + flipbookThumbs[nextIdx];
+      // Update size constraints for open view
+      flipbookIdx = nextIdx;
+      setPageSizeConstraints();
 
-      // Start at rest, animate up to -180deg
+      // Current bottom page flips up and over the binding
+      flipbookFlipFront.src = flipbookBottomImg.src;
+      flipbookBottomImg.src = 'data:image/png;base64,' + flipbookThumbs[nextIdx];
+
+      // Start flat (0deg), animate to flipped over (-180deg)
       flipbookFlipLayer.style.transition = 'none';
       flipbookFlipLayer.style.transform = 'rotateX(0deg)';
       flipbookFlipLayer.style.display = '';
@@ -1560,32 +1658,38 @@
 
       flipbookFlipLayer.style.transition = 'transform ' + FLIP_MS + 'ms cubic-bezier(0.4, 0, 0.2, 1)';
       flipbookFlipLayer.style.transform = 'rotateX(-180deg)';
-      flipbookShadow.style.opacity = '1';
+      flipbookShadow.style.opacity = '0.6';
 
-      flipbookIdx = nextIdx;
-      updateFlipbookNav();
+      updateFlipbookState();
 
       setTimeout(() => {
         flipbookFlipLayer.style.display = 'none';
         flipbookShadow.style.opacity = '0';
+
+        // Show the flipped-back page on top
+        flipbookTopImg.src = 'data:image/png;base64,' + flipbookThumbs[curIdx];
+        flipbookTopWrap.classList.remove('closed');
+
         flipState = 'idle';
-        updateFlipbookNav();
+        updateFlipbookState();
+        buildWireoRings();
       }, FLIP_MS);
     }
 
     function flipBackward() {
       if (flipState !== 'idle' || flipbookIdx <= 0) return;
       flipState = 'flipping';
-      const prevIdx = flipbookIdx - 1;
+      const curIdx = flipbookIdx;
+      const prevIdx = curIdx - 1;
 
-      // Front of flipping page = previous page, static underneath = current page
+      // The top page flips back down to become the bottom page
       flipbookFlipFront.src = 'data:image/png;base64,' + flipbookThumbs[prevIdx];
 
-      // Start flipped up at -180deg, animate back down to 0
+      // Start flipped over (-180deg), animate back to flat (0deg)
       flipbookFlipLayer.style.transition = 'none';
       flipbookFlipLayer.style.transform = 'rotateX(-180deg)';
       flipbookFlipLayer.style.display = '';
-      flipbookShadow.style.opacity = '1';
+      flipbookShadow.style.opacity = '0.6';
       void flipbookFlipLayer.offsetHeight;
 
       flipbookFlipLayer.style.transition = 'transform ' + FLIP_MS + 'ms cubic-bezier(0.4, 0, 0.2, 1)';
@@ -1593,34 +1697,61 @@
       flipbookShadow.style.opacity = '0';
 
       flipbookIdx = prevIdx;
-      updateFlipbookNav();
+      updateFlipbookState();
 
       setTimeout(() => {
         flipbookFlipLayer.style.display = 'none';
-        flipbookStatic.src = 'data:image/png;base64,' + flipbookThumbs[flipbookIdx];
+
+        // Update pages
+        flipbookBottomImg.src = 'data:image/png;base64,' + flipbookThumbs[prevIdx];
+
+        if (prevIdx === 0) {
+          // Back to closed – hide top page
+          flipbookTopWrap.classList.add('closed');
+          setPageSizeConstraints();
+        } else {
+          // Show previous flipped-back page on top
+          flipbookTopImg.src = 'data:image/png;base64,' + flipbookThumbs[prevIdx - 1];
+        }
+
         flipState = 'idle';
-        updateFlipbookNav();
+        updateFlipbookState();
+        buildWireoRings();
       }, FLIP_MS);
     }
 
     flipbookPrev.addEventListener('click', flipBackward);
     flipbookNext.addEventListener('click', flipForward);
-    flipbookClose.addEventListener('click', () => { flipbookOverlay.classList.remove('active'); flipState = 'idle'; });
+    flipbookClose.addEventListener('click', () => {
+      flipbookOverlay.classList.remove('active');
+      flipState = 'idle';
+    });
 
     flipbookStage.addEventListener('click', e => {
-      if (e.target === flipbookStage) { flipbookOverlay.classList.remove('active'); flipState = 'idle'; }
+      if (e.target === flipbookStage) {
+        flipbookOverlay.classList.remove('active');
+        flipState = 'idle';
+      }
     });
 
     document.addEventListener('keydown', e => {
       if (!flipbookOverlay.classList.contains('active')) return;
-      if (e.key === 'Escape') { flipbookOverlay.classList.remove('active'); flipState = 'idle'; }
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); flipBackward(); }
-      else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); flipForward(); }
+      if (e.key === 'Escape') {
+        flipbookOverlay.classList.remove('active');
+        flipState = 'idle';
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        flipBackward();
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        flipForward();
+      }
     });
 
     window.addEventListener('resize', () => {
-      if (flipbookOverlay.classList.contains('active') && flipbookPageArea.style.display !== 'none') {
-        buildBindingRings();
+      if (flipbookOverlay.classList.contains('active') && flipbookLoading.style.display === 'none') {
+        setPageSizeConstraints();
+        buildWireoRings();
       }
     });
   </script>
