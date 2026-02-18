@@ -664,6 +664,7 @@ def api_process():
         flipbook_info = {
             "pages": result["pages"],
             "bleed_in": bleed,
+            "flip_even_pages": flip_even,
         }
         info_path = os.path.join(UPLOAD_DIR, job_id, "job_info.json")
         with open(info_path, "w") as f:
@@ -707,7 +708,11 @@ def api_flipbook(job_id):
             info = json.load(f)
         thumbs = render_flipbook_thumbnails(
             output_path, info["pages"], info["bleed_in"])
-        return jsonify({"thumbnails": thumbs, "page_count": len(thumbs)})
+        return jsonify({
+            "thumbnails": thumbs,
+            "page_count": len(thumbs),
+            "double_sided": info.get("flip_even_pages", True),
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

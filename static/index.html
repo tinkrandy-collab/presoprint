@@ -1531,11 +1531,30 @@
       });
     }
 
-    // ── Wire-O Flip Book Viewer (table-top view) ─────────────────────
+    // ── Wire-O Flip Book Viewer (table-top, sheet-based) ────────────
+    //
+    // Physical model:
+    //   Double-sided: pages pair into sheets – (0,1), (2,3), (4,5)…
+    //     sheet.front = page 2K, sheet.back = page 2K+1
+    //   Single-sided: each page is its own sheet, back is blank white.
+    //
+    // View positions (sheetIdx):
+    //   0  (closed) : bottom = sheet[0].front (cover), top = hidden
+    //   K  (open)   : bottom = sheet[K].front,  top = sheet[K-1].back
+    //
+
     let flipbookThumbs = [];
-    let flipbookIdx = 0;     // 0 = closed (cover only), 1+ = open at that page
+    let flipbookSheets = [];  // [{front: dataUrl, back: dataUrl|null}]
+    let sheetIdx = 0;
+    let flipDoubleSided = true;
     let flipState = 'idle';
     const FLIP_MS = 600;
+
+    // Blank white page used for sheet backs in single-sided mode
+    const BLANK_PAGE_SRC = 'data:image/svg+xml,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600">' +
+      '<rect fill="white" width="800" height="600"/></svg>'
+    );
 
     const flipbookOverlay = $('flipbookOverlay');
     const flipbookTopWrap = $('flipbookTopWrap');
@@ -1553,6 +1572,30 @@
     const flipbookSpine = $('flipbookSpine');
     const flipbookStage = $('flipbookStage');
 
+    /** Build physical sheets from page thumbnails. */
+    function buildSheets(thumbs, doubleSided) {
+      const sheets = [];
+      const src = i => 'data:image/png;base64,' + thumbs[i];
+      if (doubleSided) {
+        for (let i = 0; i < thumbs.length; i += 2) {
+          sheets.push({
+            front: src(i),
+            back: (i + 1 < thumbs.length) ? src(i + 1) : null,
+          });
+        }
+      } else {
+        for (let i = 0; i < thumbs.length; i++) {
+          sheets.push({ front: src(i), back: null });
+        }
+      }
+      return sheets;
+    }
+
+    /** Resolve a back-page src, substituting blank white for null. */
+    function backSrc(sheet) {
+      return sheet.back || BLANK_PAGE_SRC;
+    }
+
     function buildWireoRings() {
       const w = flipbookBottomImg.offsetWidth || 400;
       flipbookSpine.style.width = w + 'px';
@@ -1568,8 +1611,7 @@
 
     function setPageSizeConstraints() {
       const maxW = Math.min(window.innerWidth * 0.7, 800);
-      // When open (two pages visible), each page gets half the available height
-      const isOpen = flipbookIdx > 0;
+      const isOpen = sheetIdx > 0;
       const maxH = isOpen
         ? (window.innerHeight - 180) / 2
         : (window.innerHeight - 160);
@@ -1603,7 +1645,10 @@
         }
 
         flipbookThumbs = data.thumbnails;
-        flipbookIdx = 0;
+        flipDoubleSided = data.double_sided !== false;
+        flipbookSheets = buildSheets(flipbookThumbs, flipDoubleSided);
+        sheetIdx = 0;
+
         flipbookLoading.style.display = 'none';
         flipbookBottomWrap.style.display = '';
         flipbookFlipLayer.style.display = 'none';
@@ -1614,7 +1659,7 @@
           buildWireoRings();
           flipbookBottomImg.onload = null;
         };
-        flipbookBottomImg.src = 'data:image/png;base64,' + flipbookThumbs[0];
+        flipbookBottomImg.src = flipbookSheets[0].front;
         updateFlipbookState();
       } catch (err) {
         flipbookOverlay.classList.remove('active');
@@ -1623,33 +1668,36 @@
     }
 
     function updateFlipbookState() {
-      const total = flipbookThumbs.length;
-      if (flipbookIdx === 0) {
-        flipbookCounter.textContent = 'Cover \u2014 ' + total + ' pages';
+      const totalPages = flipbookThumbs.length;
+      const numSheets = flipbookSheets.length;
+
+      if (sheetIdx === 0) {
+        flipbookCounter.textContent = 'Cover \u2014 ' + totalPages + ' pages';
         flipbookTopWrap.classList.add('closed');
       } else {
-        flipbookCounter.textContent = 'Page ' + (flipbookIdx + 1) + ' of ' + total;
+        // Which page number is on the bottom?
+        const bottomPageNum = flipDoubleSided ? sheetIdx * 2 + 1 : sheetIdx + 1;
+        flipbookCounter.textContent = 'Page ' + bottomPageNum + ' of ' + totalPages;
         flipbookTopWrap.classList.remove('closed');
       }
-      flipbookPrev.disabled = flipbookIdx === 0 || flipState !== 'idle';
-      flipbookNext.disabled = flipbookIdx >= total - 1 || flipState !== 'idle';
+      flipbookPrev.disabled = sheetIdx === 0 || flipState !== 'idle';
+      flipbookNext.disabled = sheetIdx >= numSheets - 1 || flipState !== 'idle';
     }
 
     function flipForward() {
-      if (flipState !== 'idle' || flipbookIdx >= flipbookThumbs.length - 1) return;
+      if (flipState !== 'idle' || sheetIdx >= flipbookSheets.length - 1) return;
       flipState = 'flipping';
-      const curIdx = flipbookIdx;
-      const nextIdx = curIdx + 1;
+      const curSheet = sheetIdx;
+      const nextSheet = curSheet + 1;
 
-      // Update size constraints for open view
-      flipbookIdx = nextIdx;
+      sheetIdx = nextSheet;
       setPageSizeConstraints();
 
-      // Current bottom page flips up and over the binding
-      flipbookFlipFront.src = flipbookBottomImg.src;
-      flipbookBottomImg.src = 'data:image/png;base64,' + flipbookThumbs[nextIdx];
+      // The current bottom page (sheet front) flips up and over
+      flipbookFlipFront.src = flipbookSheets[curSheet].front;
+      // Reveal the next sheet's front underneath
+      flipbookBottomImg.src = flipbookSheets[nextSheet].front;
 
-      // Start flat (0deg), animate to flipped over (-180deg)
       flipbookFlipLayer.style.transition = 'none';
       flipbookFlipLayer.style.transform = 'rotateX(0deg)';
       flipbookFlipLayer.style.display = '';
@@ -1666,8 +1714,8 @@
         flipbookFlipLayer.style.display = 'none';
         flipbookShadow.style.opacity = '0';
 
-        // Show the flipped-back page on top
-        flipbookTopImg.src = 'data:image/png;base64,' + flipbookThumbs[curIdx];
+        // After flip: top shows the back of the sheet that just flipped over
+        flipbookTopImg.src = backSrc(flipbookSheets[curSheet]);
         flipbookTopWrap.classList.remove('closed');
 
         flipState = 'idle';
@@ -1677,15 +1725,15 @@
     }
 
     function flipBackward() {
-      if (flipState !== 'idle' || flipbookIdx <= 0) return;
+      if (flipState !== 'idle' || sheetIdx <= 0) return;
       flipState = 'flipping';
-      const curIdx = flipbookIdx;
-      const prevIdx = curIdx - 1;
+      const curSheet = sheetIdx;
+      const prevSheet = curSheet - 1;
 
-      // The top page flips back down to become the bottom page
-      flipbookFlipFront.src = 'data:image/png;base64,' + flipbookThumbs[prevIdx];
+      // The page on top (sheet[prevSheet].back) flips back down.
+      // The flip front face = sheet[prevSheet].front (what we'll see when it lands)
+      flipbookFlipFront.src = flipbookSheets[prevSheet].front;
 
-      // Start flipped over (-180deg), animate back to flat (0deg)
       flipbookFlipLayer.style.transition = 'none';
       flipbookFlipLayer.style.transform = 'rotateX(-180deg)';
       flipbookFlipLayer.style.display = '';
@@ -1696,22 +1744,22 @@
       flipbookFlipLayer.style.transform = 'rotateX(0deg)';
       flipbookShadow.style.opacity = '0';
 
-      flipbookIdx = prevIdx;
+      sheetIdx = prevSheet;
       updateFlipbookState();
 
       setTimeout(() => {
         flipbookFlipLayer.style.display = 'none';
 
-        // Update pages
-        flipbookBottomImg.src = 'data:image/png;base64,' + flipbookThumbs[prevIdx];
+        // Bottom now shows this sheet's front
+        flipbookBottomImg.src = flipbookSheets[prevSheet].front;
 
-        if (prevIdx === 0) {
-          // Back to closed – hide top page
+        if (prevSheet === 0) {
+          // Back to closed – hide top
           flipbookTopWrap.classList.add('closed');
           setPageSizeConstraints();
         } else {
-          // Show previous flipped-back page on top
-          flipbookTopImg.src = 'data:image/png;base64,' + flipbookThumbs[prevIdx - 1];
+          // Top shows the back of the sheet before this one
+          flipbookTopImg.src = backSrc(flipbookSheets[prevSheet - 1]);
         }
 
         flipState = 'idle';
