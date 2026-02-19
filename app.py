@@ -27,9 +27,9 @@ DEFAULT_TRIM_WIDTH_IN = 10.5   # fixed width
 DEFAULT_BLEED_IN = 0.125
 
 # Safe margins (inches)
-DEFAULT_MARGIN_LEFT = 0.5
-DEFAULT_MARGIN_RIGHT = 0.5
-DEFAULT_MARGIN_TOP = 1.5
+DEFAULT_MARGIN_LEFT = 0.25
+DEFAULT_MARGIN_RIGHT = 0.25
+DEFAULT_MARGIN_TOP = 0.5
 DEFAULT_MARGIN_BOTTOM = 0.5
 
 MARK_OFFSET = 3
@@ -354,11 +354,12 @@ def render_thumbnails(pdf_path, dpi=THUMBNAIL_DPI):
     return thumbs
 
 
-def render_flipbook_thumbnails(processed_path, pages_info, bleed_in, dpi=150):
-    """Render thumbnails cropped to trim area with flipped pages un-flipped.
+def render_flipbook_thumbnails(processed_path, pages_info, bleed_in,
+                               flip_even_pages=True, dpi=150):
+    """Render thumbnails cropped to trim area for flipbook viewing.
 
-    Creates a temporary PDF cropped to the TrimBox with flipped pages
-    rotated back to normal orientation, then renders thumbnails from it.
+    The preview uses pages as they exist in the processed PDF. The UI then
+    applies physical page-turn orientation (top page flipped over binding).
     """
     bleed = bleed_in * PTS_PER_INCH
 
@@ -379,7 +380,9 @@ def render_flipbook_thumbnails(processed_path, pages_info, bleed_in, dpi=150):
             if box_name in page.obj:
                 del page.obj[box_name]
 
-        if i < len(pages_info) and pages_info[i].get("flipped", False):
+        # Normalize odd-index pages when alternate-page flip is enabled so the
+        # flipbook can display a readable top page in that mode.
+        if flip_even_pages and (i % 2 == 1):
             page.obj[Name.Rotate] = 180
 
     temp_path = processed_path + ".flipbook.pdf"
@@ -706,12 +709,16 @@ def api_flipbook(job_id):
     try:
         with open(info_path) as f:
             info = json.load(f)
+        flip_even_pages = info.get("flip_even_pages", True)
         thumbs = render_flipbook_thumbnails(
-            output_path, info["pages"], info["bleed_in"])
+            output_path, info["pages"], info["bleed_in"],
+            flip_even_pages=flip_even_pages)
         return jsonify({
             "thumbnails": thumbs,
             "page_count": len(thumbs),
-            "double_sided": info.get("flip_even_pages", True),
+            "double_sided": True,
+            "flip_even_pages": flip_even_pages,
+            "pages": info.get("pages", []),
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500

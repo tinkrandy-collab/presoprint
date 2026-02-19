@@ -2,6 +2,8 @@
 __pycache__/
 *.pyc
 *.pyo
+.venv/
+*.log
 
 # PDF test artifacts
 test_input.pdf

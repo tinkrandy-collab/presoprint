@@ -46,6 +46,71 @@
       padding: 48px 24px 80px;
     }
 
+    /* ── Workflow Stepper ────────────────────────────────────── */
+    .workflow {
+      margin-bottom: 28px;
+    }
+    .workflow-track {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: start;
+      gap: 0;
+    }
+    .workflow-step {
+      position: relative;
+      text-align: center;
+      padding: 0 8px;
+    }
+    .workflow-step::after {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: calc(50% + 24px);
+      right: calc(-50% + 24px);
+      height: 4px;
+      border-radius: 4px;
+      background: #dcdce1;
+      z-index: 0;
+    }
+    .workflow-step:last-child::after { display: none; }
+    .workflow-step.done::after { background: #4ab32a; }
+    .workflow-dot {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 8px;
+      border-radius: 50%;
+      border: 2px solid #c7c7cc;
+      background: #fff;
+      color: #7a7a80;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .workflow-step.done .workflow-dot {
+      border-color: #4ab32a;
+      background: #4ab32a;
+      color: #fff;
+    }
+    .workflow-step.active .workflow-dot {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
+    }
+    .workflow-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.3;
+      max-width: 170px;
+      margin: 0 auto;
+    }
+    .workflow-step.done .workflow-label,
+    .workflow-step.active .workflow-label {
+      color: var(--text);
+      font-weight: 500;
+    }
+
     /* ── Header ──────────────────────────────────────────────── */
     header {
       text-align: center;
@@ -694,6 +759,8 @@
     @media (max-width: 600px) {
       .container { padding: 24px 16px 60px; }
       header h1 { font-size: 28px; }
+      .workflow-track { grid-template-columns: 1fr 1fr; row-gap: 14px; }
+      .workflow-step::after { display: none; }
       .form-grid { grid-template-columns: 1fr; }
       .margin-grid { grid-template-columns: 1fr 1fr; }
       .stat-grid { grid-template-columns: 1fr; }
@@ -793,17 +860,22 @@
       flex-direction: column;
       align-items: center;
       position: relative;
+      --punch-depth-px: 12px;
+      --binding-overlap-px: 7px;
+      --top-page-rotation: 180deg;
     }
 
     /* Top page – flipped back over the binding */
     .flipbook-top-wrap {
       line-height: 0;
       position: relative;
+      overflow: hidden;
     }
     .flipbook-top-wrap img {
       display: block;
       border-radius: 3px 3px 0 0;
       box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
+      transform: rotate(var(--top-page-rotation));
     }
     .flipbook-top-wrap.closed { display: none; }
     .flipbook-top-wrap::after {
@@ -819,49 +891,20 @@
     .flipbook-wireo {
       position: relative;
       z-index: 10;
-      height: 32px;
+      width: 100%;
+      line-height: 0;
+      margin-top: calc(var(--binding-overlap-px) * -1);
+      margin-bottom: calc(var(--binding-overlap-px) * -1);
     }
     .flipbook-wireo-spine {
-      height: 100%;
-      background: linear-gradient(180deg,
-        #505054 0%, #3a3a3c 20%, #2a2a2c 45%,
-        #1a1a1c 55%, #2a2a2c 80%, #505054 100%);
-      border-radius: 3px;
-      display: flex;
-      align-items: center;
-      justify-content: space-evenly;
-      padding: 0 10px;
-      box-shadow:
-        0 3px 10px rgba(0,0,0,0.5),
-        0 -3px 10px rgba(0,0,0,0.5),
-        inset 0 1px 0 rgba(255,255,255,0.1),
-        inset 0 -1px 0 rgba(255,255,255,0.1);
+      margin: 0 auto;
     }
-
-    /* Double-loop wire ring */
-    .wireo-ring {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      flex-shrink: 0;
-    }
-    .wireo-ring-loop {
-      width: 10px;
-      height: 11px;
-      border: 1.8px solid #707075;
-      border-radius: 50%;
-      background: linear-gradient(145deg, #c8c8cc 0%, #909095 40%, #b0b0b5 100%);
-      box-shadow:
-        0 0.5px 1px rgba(0,0,0,0.4),
-        inset 0 0.5px 0.5px rgba(255,255,255,0.35);
-      position: relative;
-    }
-    .wireo-ring-loop::after {
-      content: '';
-      position: absolute;
-      inset: 2px;
-      border-radius: 50%;
-      background: linear-gradient(145deg, #48484a 0%, #2c2c2e 100%);
+    .flipbook-binding-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: transparent;
+      pointer-events: none;
     }
 
     /* Bottom page – current page */
@@ -869,6 +912,7 @@
       line-height: 0;
       position: relative;
       perspective: 2000px;
+      overflow: hidden;
     }
     .flipbook-bottom-wrap > img.flipbook-page-img {
       display: block;
@@ -894,6 +938,29 @@
       transform-origin: top center;
       z-index: 5;
       display: none;
+    }
+    .binding-punch-zone {
+      position: absolute;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+      z-index: 7;
+    }
+    .binding-punch-zone.top {
+      bottom: 0;
+      height: var(--punch-depth-px);
+      background: linear-gradient(to top,
+        rgba(0,0,0,0.26) 0%,
+        rgba(0,0,0,0.14) 55%,
+        rgba(0,0,0,0.00) 100%);
+    }
+    .binding-punch-zone.bottom {
+      top: 0;
+      height: var(--punch-depth-px);
+      background: linear-gradient(to bottom,
+        rgba(0,0,0,0.26) 0%,
+        rgba(0,0,0,0.14) 55%,
+        rgba(0,0,0,0.00) 100%);
     }
     .flipbook-flip-front,
     .flipbook-flip-back {
@@ -958,8 +1025,14 @@
     @media (max-width: 600px) {
       .flipbook-stage { padding: 72px 12px 40px; gap: 12px; }
       .flipbook-nav { width: 36px; height: 36px; font-size: 18px; }
-      .flipbook-wireo { height: 26px; }
-      .wireo-ring-loop { width: 8px; height: 9px; }
+    }
+
+    .app-footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      padding: 0 24px 28px;
+      line-height: 1.6;
     }
   </style>
 </head>
@@ -992,14 +1065,18 @@
         <!-- Top: flipped-back page -->
         <div class="flipbook-top-wrap closed" id="flipbookTopWrap">
           <img id="flipbookTopImg" src="" alt="Flipped page">
+          <div class="binding-punch-zone top"></div>
         </div>
         <!-- Wire-O binding -->
         <div class="flipbook-wireo">
-          <div class="flipbook-wireo-spine" id="flipbookSpine"></div>
+          <div class="flipbook-wireo-spine" id="flipbookSpine">
+            <img class="flipbook-binding-img" id="flipbookBindingImg" src="" alt="Wire binding">
+          </div>
         </div>
         <!-- Bottom: current page -->
         <div class="flipbook-bottom-wrap" id="flipbookBottomWrap">
           <img class="flipbook-page-img" id="flipbookBottomImg" src="" alt="Current page">
+          <div class="binding-punch-zone bottom"></div>
           <div class="flipbook-flip-layer" id="flipbookFlipLayer">
             <div class="flipbook-flip-front"><img id="flipbookFlipFront" src="" alt=""></div>
             <div class="flipbook-flip-back"></div>
@@ -1013,6 +1090,27 @@
   </div>
 
   <div class="container">
+    <div class="workflow" id="workflow">
+      <div class="workflow-track">
+        <div class="workflow-step active" data-step="1">
+          <div class="workflow-dot">1</div>
+          <div class="workflow-label">Upload PDF</div>
+        </div>
+        <div class="workflow-step" data-step="2">
+          <div class="workflow-dot">2</div>
+          <div class="workflow-label">Select Options</div>
+        </div>
+        <div class="workflow-step" data-step="3">
+          <div class="workflow-dot">3</div>
+          <div class="workflow-label">Generate PDF and Preview</div>
+        </div>
+        <div class="workflow-step" data-step="4">
+          <div class="workflow-dot">4</div>
+          <div class="workflow-label">Download Print PDF</div>
+        </div>
+      </div>
+    </div>
+
     <header>
       <h1>PDF Print Production</h1>
       <p>Prepare presentation slides for print with bleeds, crop marks, and binding layout</p>
@@ -1081,7 +1179,7 @@
         <div class="margin-grid">
           <div class="form-group">
             <label class="form-label" for="marginTop">Top</label>
-            <input class="form-input" type="number" id="marginTop" value="1.5" step="0.125" min="0.25">
+            <input class="form-input" type="number" id="marginTop" value="0.5" step="0.125" min="0.25">
             <div class="form-hint">binding</div>
           </div>
           <div class="form-group">
@@ -1090,11 +1188,11 @@
           </div>
           <div class="form-group">
             <label class="form-label" for="marginLeft">Left</label>
-            <input class="form-input" type="number" id="marginLeft" value="0.5" step="0.125" min="0.25">
+            <input class="form-input" type="number" id="marginLeft" value="0.25" step="0.125" min="0.25">
           </div>
           <div class="form-group">
             <label class="form-label" for="marginRight">Right</label>
-            <input class="form-input" type="number" id="marginRight" value="0.5" step="0.125" min="0.25">
+            <input class="form-input" type="number" id="marginRight" value="0.25" step="0.125" min="0.25">
           </div>
         </div>
       </div>
@@ -1165,6 +1263,12 @@
     </div>
   </div>
 
+  <footer class="app-footer">
+    <div>Version 0.3</div>
+    <div>Last updated: February 19, 2026</div>
+    <div>Copyright &copy; 2026 TInkr Creative, LLC.</div>
+  </footer>
+
   <script>
     // ── DOM refs ────────────────────────────────────────────────────────
     const $ = id => document.getElementById(id);
@@ -1199,6 +1303,7 @@
     const calcTrimW = $('calcTrimW');
     const calcTrimH = $('calcTrimH');
     const calcBleed = $('calcBleed');
+    const workflowEl = $('workflow');
 
     const dialogOverlay = $('dialogOverlay');
     const dialogTitle = $('dialogTitle');
@@ -1211,6 +1316,15 @@
     let uploadedFilename = null;
     let previewPages = [];    // from /api/preview
     let deletedIndices = new Set();
+
+    function setWorkflowStep(step) {
+      const nodes = workflowEl.querySelectorAll('.workflow-step');
+      nodes.forEach((node, idx) => {
+        const n = idx + 1;
+        node.classList.toggle('done', n < step || step === 5);
+        node.classList.toggle('active', n === step && step <= 4);
+      });
+    }
 
     // ── Drag & drop / file select ──────────────────────────────────────
     dropzone.addEventListener('click', () => fileInput.click());
@@ -1250,6 +1364,7 @@
       processBtn.disabled = true;
       results.classList.remove('active');
       errorMsg.classList.remove('active');
+      setWorkflowStep(1);
     }
 
     function formatSize(bytes) {
@@ -1286,6 +1401,7 @@
         settingsCard.style.display = '';
         processBtn.disabled = false;
         updateCalcPreview();
+        setWorkflowStep(2);
       } catch (err) {
         showError(err.message || 'Upload failed');
       }
@@ -1402,6 +1518,7 @@
       form.append('delete_pages', JSON.stringify([...deletedIndices]));
 
       processBtn.disabled = true;
+      setWorkflowStep(3);
       progressWrap.classList.add('active');
       progressBar.style.width = '0%';
       progressText.textContent = 'Processing...';
@@ -1450,10 +1567,12 @@
       const totalPages = data.pages.length;
       const allPassed = data.verification.every(v => v.all_pass);
       const dlName = encodeURIComponent(data.filename || 'output');
+      flipbookPageMeta = Array.isArray(data.pages) ? data.pages : [];
+      flipEvenPagesSetting = flipbookPageMeta.some(pg => pg && pg.flipped === true);
 
       // Download button + flip book preview
       downloadArea.innerHTML = `
-        <a class="download-btn" href="/api/download/${data.job_id}?name=${dlName}">
+        <a class="download-btn" id="downloadBtn" href="/api/download/${data.job_id}?name=${dlName}">
           <svg viewBox="0 0 24 24"><path d="M12 3v14M12 17l-5-5M12 17l5-5"/><path d="M5 20h14"/></svg>
           Download Print-Ready PDF
         </a>
@@ -1521,6 +1640,11 @@
       html += '</div></div>';
       detailsArea.innerHTML = html;
       results.classList.add('active');
+      setWorkflowStep(4);
+      const downloadBtn = $('downloadBtn');
+      if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => setWorkflowStep(5), { once: true });
+      }
 
       // Scroll to results
       downloadArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1534,9 +1658,9 @@
     // ── Wire-O Flip Book Viewer (table-top, sheet-based) ────────────
     //
     // Physical model:
-    //   Double-sided: pages pair into sheets – (0,1), (2,3), (4,5)…
-    //     sheet.front = page 2K, sheet.back = page 2K+1
-    //   Single-sided: each page is its own sheet, back is blank white.
+    //   Always double-sided in preview: pages pair into sheets
+    //   (0,1), (2,3), (4,5)… where sheet.front = page 2K and
+    //   sheet.back = page 2K+1 (or blank if missing).
     //
     // View positions (sheetIdx):
     //   0  (closed) : bottom = sheet[0].front (cover), top = hidden
@@ -1545,12 +1669,16 @@
 
     let flipbookThumbs = [];
     let flipbookSheets = [];  // [{front: dataUrl, back: dataUrl|null}]
+    let flipbookPageMeta = [];
+    let flipEvenPagesSetting = true;
     let sheetIdx = 0;
-    let flipDoubleSided = true;
     let flipState = 'idle';
     const FLIP_MS = 600;
+    const BINDING_PUNCH_IN = 0.25;
+    const BINDING_OPEN_SRC = '/static/wirebinding_open.svg';
+    const BINDING_CLOSED_SRC = '/static/wirebinding_closed.svg';
 
-    // Blank white page used for sheet backs in single-sided mode
+    // Blank white page used when the final sheet has no back page.
     const BLANK_PAGE_SRC = 'data:image/svg+xml,' + encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600">' +
       '<rect fill="white" width="800" height="600"/></svg>'
@@ -1569,24 +1697,20 @@
     const flipbookNext = $('flipbookNext');
     const flipbookClose = $('flipbookClose');
     const flipbookLoading = $('flipbookLoading');
+    const flipbookBook = $('flipbookBook');
     const flipbookSpine = $('flipbookSpine');
+    const flipbookBindingImg = $('flipbookBindingImg');
     const flipbookStage = $('flipbookStage');
 
     /** Build physical sheets from page thumbnails. */
-    function buildSheets(thumbs, doubleSided) {
+    function buildSheets(thumbs) {
       const sheets = [];
       const src = i => 'data:image/png;base64,' + thumbs[i];
-      if (doubleSided) {
-        for (let i = 0; i < thumbs.length; i += 2) {
-          sheets.push({
-            front: src(i),
-            back: (i + 1 < thumbs.length) ? src(i + 1) : null,
-          });
-        }
-      } else {
-        for (let i = 0; i < thumbs.length; i++) {
-          sheets.push({ front: src(i), back: null });
-        }
+      for (let i = 0; i < thumbs.length; i += 2) {
+        sheets.push({
+          front: src(i),
+          back: (i + 1 < thumbs.length) ? src(i + 1) : null,
+        });
       }
       return sheets;
     }
@@ -1596,17 +1720,51 @@
       return sheet.back || BLANK_PAGE_SRC;
     }
 
-    function buildWireoRings() {
+    function parseTrimWidthIn(meta) {
+      if (!meta || typeof meta.trim_size !== 'string') return null;
+      const m = meta.trim_size.match(/([\d.]+)\"/);
+      return m ? parseFloat(m[1]) : null;
+    }
+
+    function applyBindingPunchDepth() {
+      const pageMeta = flipbookPageMeta[sheetIdx * 2];
+      const trimWidthIn = parseTrimWidthIn(pageMeta);
+      const displayedWidthPx = flipbookBottomImg.getBoundingClientRect().width || 0;
+      if (!trimWidthIn || displayedWidthPx <= 0) {
+        flipbookBook.style.setProperty('--punch-depth-px', '12px');
+        flipbookBook.style.setProperty('--binding-overlap-px', '7px');
+        return;
+      }
+      const pxPerIn = displayedWidthPx / trimWidthIn;
+      const depthPx = Math.max(5, Math.min(42, pxPerIn * BINDING_PUNCH_IN));
+      const overlapPx = Math.max(3, Math.round(depthPx * 0.58));
+      flipbookBook.style.setProperty('--punch-depth-px', depthPx.toFixed(2) + 'px');
+      flipbookBook.style.setProperty('--binding-overlap-px', overlapPx.toFixed(2) + 'px');
+    }
+
+    function shouldTopPageBeUpsideDown() {
+      if (sheetIdx === 0) return false;
+      const topPageIndex = (sheetIdx - 1) * 2 + 1;
+      const topMeta = flipbookPageMeta[topPageIndex];
+      if (topMeta && typeof topMeta.flipped === 'boolean') {
+        return !topMeta.flipped;
+      }
+      return !flipEvenPagesSetting;
+    }
+
+    function updateTopPageOrientation() {
+      flipbookBook.style.setProperty(
+        '--top-page-rotation',
+        shouldTopPageBeUpsideDown() ? '180deg' : '0deg'
+      );
+    }
+
+    function updateBindingVisual() {
       const w = flipbookBottomImg.offsetWidth || 400;
       flipbookSpine.style.width = w + 'px';
-      flipbookSpine.innerHTML = '';
-      const ringCount = Math.max(4, Math.floor(w / 36));
-      for (let i = 0; i < ringCount; i++) {
-        const ring = document.createElement('div');
-        ring.className = 'wireo-ring';
-        ring.innerHTML = '<div class="wireo-ring-loop"></div><div class="wireo-ring-loop"></div>';
-        flipbookSpine.appendChild(ring);
-      }
+      flipbookBindingImg.src = (sheetIdx === 0) ? BINDING_CLOSED_SRC : BINDING_OPEN_SRC;
+      applyBindingPunchDepth();
+      updateTopPageOrientation();
     }
 
     function setPageSizeConstraints() {
@@ -1629,7 +1787,7 @@
       flipbookBottomWrap.style.display = 'none';
       flipbookLoading.style.display = '';
       flipbookSpine.style.width = '200px';
-      flipbookSpine.innerHTML = '';
+      flipbookBindingImg.src = BINDING_CLOSED_SRC;
       flipbookCounter.textContent = '';
       flipbookPrev.disabled = true;
       flipbookNext.disabled = true;
@@ -1645,8 +1803,13 @@
         }
 
         flipbookThumbs = data.thumbnails;
-        flipDoubleSided = data.double_sided !== false;
-        flipbookSheets = buildSheets(flipbookThumbs, flipDoubleSided);
+        if (Array.isArray(data.pages) && data.pages.length) {
+          flipbookPageMeta = data.pages;
+        }
+        if (typeof data.flip_even_pages === 'boolean') {
+          flipEvenPagesSetting = data.flip_even_pages;
+        }
+        flipbookSheets = buildSheets(flipbookThumbs);
         sheetIdx = 0;
 
         flipbookLoading.style.display = 'none';
@@ -1656,7 +1819,7 @@
         setPageSizeConstraints();
 
         flipbookBottomImg.onload = function() {
-          buildWireoRings();
+          updateBindingVisual();
           flipbookBottomImg.onload = null;
         };
         flipbookBottomImg.src = flipbookSheets[0].front;
@@ -1676,12 +1839,13 @@
         flipbookTopWrap.classList.add('closed');
       } else {
         // Which page number is on the bottom?
-        const bottomPageNum = flipDoubleSided ? sheetIdx * 2 + 1 : sheetIdx + 1;
+        const bottomPageNum = sheetIdx * 2 + 1;
         flipbookCounter.textContent = 'Page ' + bottomPageNum + ' of ' + totalPages;
         flipbookTopWrap.classList.remove('closed');
       }
       flipbookPrev.disabled = sheetIdx === 0 || flipState !== 'idle';
       flipbookNext.disabled = sheetIdx >= numSheets - 1 || flipState !== 'idle';
+      updateBindingVisual();
     }
 
     function flipForward() {
@@ -1720,7 +1884,7 @@
 
         flipState = 'idle';
         updateFlipbookState();
-        buildWireoRings();
+        updateBindingVisual();
       }, FLIP_MS);
     }
 
@@ -1764,7 +1928,7 @@
 
         flipState = 'idle';
         updateFlipbookState();
-        buildWireoRings();
+        updateBindingVisual();
       }, FLIP_MS);
     }
 
@@ -1799,7 +1963,7 @@
     window.addEventListener('resize', () => {
       if (flipbookOverlay.classList.contains('active') && flipbookLoading.style.display === 'none') {
         setPageSizeConstraints();
-        buildWireoRings();
+        updateBindingVisual();
       }
     });
   </script>
