@@ -15,6 +15,8 @@ import uuid
 import base64
 import json
 import tempfile
+import time
+import threading
 from flask import Flask, request, jsonify, send_file, send_from_directory
 
 import pikepdf
@@ -43,6 +45,49 @@ app = Flask(__name__, static_folder="static")
 
 UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "pdf_print_uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+JOB_PROGRESS = {}
+JOB_PROGRESS_LOCK = threading.Lock()
+
+
+def _set_progress(job_id, **fields):
+    with JOB_PROGRESS_LOCK:
+        state = JOB_PROGRESS.get(job_id, {})
+        state.update(fields)
+        JOB_PROGRESS[job_id] = state
+        return dict(state)
+
+
+def _phase_profile(phase):
+    profiles = {
+        "queued": (0, 2),
+        "processing": (2, 68),
+        "verifying": (70, 20),
+        "thumbnails": (90, 9),
+        "finalizing": (99, 1),
+        "complete": (100, 0),
+        "error": (0, 0),
+    }
+    return profiles.get(phase, (0, 0))
+
+
+def _compute_progress(state):
+    phase = state.get("phase", "queued")
+    current = int(state.get("current", 0) or 0)
+    total = int(state.get("total", 0) or 0)
+    phase_started_at = float(state.get("phase_started_at", time.time()))
+    now = time.time()
+
+    base, span = _phase_profile(phase)
+    frac = min(1.0, max(0.0, (current / total))) if total > 0 else 0.0
+    percent = 100.0 if phase == "complete" else (base + span * frac)
+
+    eta_seconds = None
+    if phase not in ("complete", "error") and total > 0 and current > 0 and current < total:
+        elapsed_phase = max(0.1, now - phase_started_at)
+        eta_seconds = int(round((elapsed_phase / current) * (total - current)))
+
+    return int(round(percent)), eta_seconds
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -339,17 +384,20 @@ def add_blank_page(pdf, trim_width_in, trim_height_in, bleed_in, insert_at):
     blank_pdf.close()
 
 
-def render_thumbnails(pdf_path, dpi=THUMBNAIL_DPI):
+def render_thumbnails(pdf_path, dpi=THUMBNAIL_DPI, progress_cb=None):
     """Return list of base64-encoded PNG thumbnails, one per page."""
     doc = fitz.open(pdf_path)
     thumbs = []
-    for page in doc:
+    total = len(doc)
+    for i, page in enumerate(doc):
         zoom = dpi / 72.0
         mat = fitz.Matrix(zoom, zoom)
         pix = page.get_pixmap(matrix=mat, alpha=False)
         png_data = pix.tobytes("png")
         b64 = base64.b64encode(png_data).decode("ascii")
         thumbs.append(b64)
+        if progress_cb is not None:
+            progress_cb("thumbnails", i + 1, total)
     doc.close()
     return thumbs
 
@@ -440,7 +488,8 @@ def process_pdf_file(input_path, output_path, trim_width_in, bleed_in,
                      margins, bg_style="auto",
                      insert_blank_after_cover=False,
                      delete_pages=None,
-                     flip_even_pages=True):
+                     flip_even_pages=True,
+                     progress_cb=None):
     """Process a PDF: auto-height, optional blank page, page deletion,
     alternating page flip for double-sided binding.
 
@@ -477,6 +526,9 @@ def process_pdf_file(input_path, output_path, trim_width_in, bleed_in,
         add_blank_page(pdf, trim_width_in, trim_height_in, bleed_in, insert_at=1)
 
     # ── Process each page ────────────────────────────────────────────
+    total_pages = len(pdf.pages)
+    if progress_cb is not None:
+        progress_cb("processing", 0, total_pages)
     pages_info = []
     for i, page in enumerate(pdf.pages):
         # Check if this is the inserted blank page
@@ -496,6 +548,8 @@ def process_pdf_file(input_path, output_path, trim_width_in, bleed_in,
                 "background_color": "rgb(1.00, 1.00, 1.00)",
                 "is_blank": True,
             })
+            if progress_cb is not None:
+                progress_cb("processing", i + 1, total_pages)
             continue
 
         flip = flip_even_pages and (i % 2 == 1)
@@ -505,6 +559,8 @@ def process_pdf_file(input_path, output_path, trim_width_in, bleed_in,
                             bg_style=bg_style,
                             flip=flip)
         pages_info.append(info)
+        if progress_cb is not None:
+            progress_cb("processing", i + 1, total_pages)
 
     pdf.save(output_path, linearize=False)
     pdf.close()
@@ -512,14 +568,18 @@ def process_pdf_file(input_path, output_path, trim_width_in, bleed_in,
     # ── Verify ───────────────────────────────────────────────────────
     pdf2 = Pdf.open(output_path)
     verification = []
+    if progress_cb is not None:
+        progress_cb("verifying", 0, len(pdf2.pages))
     for i, page in enumerate(pdf2.pages):
         checks = verify_page(page, trim_width_in, trim_height_in, bleed_in)
         all_pass = all(c["pass"] for c in checks)
         verification.append({"page": i + 1, "checks": checks, "all_pass": all_pass})
+        if progress_cb is not None:
+            progress_cb("verifying", i + 1, len(pdf2.pages))
     pdf2.close()
 
     # ── Thumbnails ───────────────────────────────────────────────────
-    thumbnails = render_thumbnails(output_path)
+    thumbnails = render_thumbnails(output_path, progress_cb=progress_cb)
 
     return {
         "pages": pages_info,
@@ -652,6 +712,40 @@ def api_process():
 
     filename = request.form.get("filename", "output.pdf")
 
+    _set_progress(
+        job_id,
+        phase="queued",
+        status="Queued...",
+        current=0,
+        total=1,
+        phase_started_at=time.time(),
+        done=False,
+        error=None,
+    )
+
+    def progress_cb(phase, current, total):
+        phase_changed = False
+        with JOB_PROGRESS_LOCK:
+            prev = JOB_PROGRESS.get(job_id, {})
+            phase_changed = prev.get("phase") != phase
+        phase_started_at = time.time() if phase_changed else None
+        status_map = {
+            "processing": "Processing pages...",
+            "verifying": "Verifying output...",
+            "thumbnails": "Rendering preview...",
+        }
+        fields = {
+            "phase": phase,
+            "current": int(current),
+            "total": int(total),
+            "status": status_map.get(phase, "Working..."),
+        }
+        if phase_started_at is not None:
+            fields["phase_started_at"] = phase_started_at
+        state = _set_progress(job_id, **fields)
+        percent, eta_seconds = _compute_progress(state)
+        _set_progress(job_id, percent=percent, eta_seconds=eta_seconds)
+
     try:
         result = process_pdf_file(
             input_path, output_path, trim_width, bleed, margins,
@@ -659,6 +753,7 @@ def api_process():
             insert_blank_after_cover=insert_blank,
             delete_pages=delete_pages,
             flip_even_pages=flip_even,
+            progress_cb=progress_cb,
         )
         result["job_id"] = job_id
         result["filename"] = filename
@@ -673,9 +768,58 @@ def api_process():
         with open(info_path, "w") as f:
             json.dump(flipbook_info, f)
 
+        _set_progress(
+            job_id,
+            phase="complete",
+            status="Complete",
+            current=1,
+            total=1,
+            percent=100,
+            eta_seconds=0,
+            done=True,
+        )
+
         return jsonify(result)
     except Exception as e:
+        _set_progress(
+            job_id,
+            phase="error",
+            status="Failed",
+            done=True,
+            error=str(e),
+        )
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/progress/<job_id>")
+def api_progress(job_id):
+    if not job_id or not job_id.isalnum() or len(job_id) != 8:
+        return jsonify({"error": "Invalid job ID"}), 400
+
+    with JOB_PROGRESS_LOCK:
+        state = dict(JOB_PROGRESS.get(job_id, {}))
+    if not state:
+        return jsonify({
+            "phase": "queued",
+            "status": "Starting...",
+            "percent": 0,
+            "eta_seconds": None,
+            "done": False,
+        })
+
+    percent = state.get("percent")
+    eta_seconds = state.get("eta_seconds")
+    if percent is None:
+        percent, eta_seconds = _compute_progress(state)
+
+    return jsonify({
+        "phase": state.get("phase", "queued"),
+        "status": state.get("status", "Working..."),
+        "percent": int(percent),
+        "eta_seconds": eta_seconds,
+        "done": bool(state.get("done", False)),
+        "error": state.get("error"),
+    })
 
 
 @app.route("/api/download/<job_id>")

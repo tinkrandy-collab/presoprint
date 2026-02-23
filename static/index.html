@@ -1499,6 +1499,24 @@
       calcTrimH.textContent = 'auto';
     }
 
+    function formatEta(seconds) {
+      if (!Number.isFinite(seconds) || seconds <= 0) return '';
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      if (mins <= 0) return `${secs}s`;
+      if (mins < 60) return `${mins}m ${secs}s`;
+      const hrs = Math.floor(mins / 60);
+      return `${hrs}h ${mins % 60}m`;
+    }
+
+    function applyProgressUpdate(data) {
+      const pct = Math.max(0, Math.min(100, Number(data.percent || 0)));
+      progressBar.style.width = `${pct}%`;
+      const eta = formatEta(Number(data.eta_seconds));
+      const base = data.status || 'Processing...';
+      progressText.textContent = eta ? `${base} · ~${eta} remaining` : base;
+    }
+
     // ── Process ────────────────────────────────────────────────────────
     processBtn.addEventListener('click', async () => {
       if (!jobId) return;
@@ -1520,37 +1538,36 @@
       processBtn.disabled = true;
       setWorkflowStep(3);
       progressWrap.classList.add('active');
-      progressBar.style.width = '0%';
-      progressText.textContent = 'Processing...';
+      progressBar.style.width = '1%';
+      progressText.textContent = 'Starting...';
       errorMsg.classList.remove('active');
       results.classList.remove('active');
 
+      let progressTimer = null;
+      const pollProgress = async () => {
+        try {
+          const r = await fetch(`/api/progress/${jobId}`);
+          const p = await r.json();
+          if (!p.error) applyProgressUpdate(p);
+        } catch (_) {
+          // Ignore transient polling errors.
+        }
+      };
+      await pollProgress();
+      progressTimer = setInterval(pollProgress, 700);
+
       try {
-        const xhr = new XMLHttpRequest();
-        const response = await new Promise((resolve, reject) => {
-          xhr.upload.addEventListener('progress', e => {
-            if (e.lengthComputable) {
-              const pct = Math.round((e.loaded / e.total) * 50);
-              progressBar.style.width = pct + '%';
-              progressText.textContent = pct < 50 ? 'Sending...' : 'Processing...';
-            }
-          });
-          xhr.addEventListener('load', () => {
-            progressBar.style.width = '100%';
-            progressText.textContent = 'Done';
-            try { resolve(JSON.parse(xhr.responseText)); }
-            catch { reject(new Error('Invalid response')); }
-          });
-          xhr.addEventListener('error', () => reject(new Error('Network error')));
-          xhr.open('POST', '/api/process');
-          xhr.send(form);
-        });
+        const resp = await fetch('/api/process', { method: 'POST', body: form });
+        const response = await resp.json();
 
         if (response.error) { showError(response.error); return; }
+        progressBar.style.width = '100%';
+        progressText.textContent = 'Complete';
         renderResults(response);
       } catch (err) {
         showError(err.message || 'Something went wrong');
       } finally {
+        if (progressTimer) clearInterval(progressTimer);
         processBtn.disabled = false;
         setTimeout(() => progressWrap.classList.remove('active'), 1200);
       }
