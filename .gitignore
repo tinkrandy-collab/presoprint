@@ -4,6 +4,7 @@ __pycache__/
 *.pyo
 .venv/
 *.log
+.env
 
 # PDF test artifacts
 test_input.pdf

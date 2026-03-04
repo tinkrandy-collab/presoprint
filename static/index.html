@@ -225,10 +225,19 @@
       background: var(--surface-alt);
       border: 2px solid var(--border-light);
       transition: all var(--transition);
-      cursor: default;
+      cursor: grab;
     }
+    .page-card:active { cursor: grabbing; }
     .page-card:hover {
       box-shadow: var(--shadow);
+    }
+    .page-card.dragging {
+      opacity: 0.65;
+      transform: scale(0.98);
+    }
+    .page-card.drag-over {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
     }
     .page-card.deleted {
       opacity: 0.35;
@@ -442,6 +451,7 @@
     .btn-primary {
       display: block;
       width: 100%;
+      min-height: 56px;
       padding: 14px 24px;
       font-size: 17px;
       font-weight: 600;
@@ -522,7 +532,8 @@
       justify-content: center;
       gap: 10px;
       width: 100%;
-      padding: 18px 28px;
+      min-height: 56px;
+      padding: 14px 28px;
       background: linear-gradient(135deg, var(--green) 0%, #30d158 100%);
       color: #fff;
       font-size: 17px;
@@ -578,6 +589,43 @@
     .output-thumb-meta {
       color: var(--text-tertiary);
       margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.25;
+    }
+    .dpi-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dpi-indicator {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .dpi-indicator.good {
+      color: #117a2a;
+      background: rgba(52,199,89,0.18);
+      border-color: rgba(52,199,89,0.5);
+    }
+    .dpi-indicator.medium {
+      color: #8a6200;
+      background: rgba(255,204,0,0.2);
+      border-color: rgba(255,204,0,0.55);
+    }
+    .dpi-indicator.low {
+      color: #a21916;
+      background: rgba(255,59,48,0.16);
+      border-color: rgba(255,59,48,0.5);
     }
     .output-thumb-flipped {
       display: inline-block;
@@ -588,6 +636,161 @@
       padding: 1px 6px;
       border-radius: 4px;
       margin-top: 4px;
+    }
+    .image-details-toggle {
+      margin-top: 6px;
+      border: none;
+      background: transparent;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .image-details-toggle .arr {
+      display: inline-block;
+      transition: transform 0.16s ease;
+      font-size: 11px;
+    }
+    .image-details-toggle.open .arr {
+      transform: rotate(90deg);
+    }
+    .image-details-panel {
+      display: none;
+      margin-top: 6px;
+      border-top: 1px solid var(--border-light);
+      padding-top: 6px;
+    }
+    .image-details-panel.open {
+      display: block;
+    }
+    .image-upscale-row {
+      margin-top: 7px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .image-upscale-note {
+      margin-top: 6px;
+      font-size: 10px;
+      color: var(--text-tertiary);
+      line-height: 1.35;
+    }
+    .image-upscale-btn {
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      background: transparent;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .image-upscale-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .mini-progress {
+      flex: 1;
+      min-width: 120px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+    .mini-progress.active {
+      display: flex;
+    }
+    .mini-progress-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .mini-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), #5ac8fa);
+      transition: width 0.25s ease;
+    }
+    .mini-progress-text {
+      font-size: 10px;
+      color: var(--text-secondary);
+      min-width: 34px;
+      text-align: right;
+      font-family: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+    }
+    .image-detail-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 5px;
+      min-width: 0;
+    }
+    .image-detail-thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      background: #f0f0f3;
+      border: 1px solid var(--border-light);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .image-detail-text {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+    .image-detail-tag {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .image-detail-tag.good {
+      color: #117a2a;
+      background: rgba(52,199,89,0.14);
+    }
+    .image-detail-tag.okay {
+      color: #8a6200;
+      background: rgba(255,204,0,0.18);
+    }
+    .image-detail-tag.low {
+      color: #a21916;
+      background: rgba(255,59,48,0.14);
+    }
+    .dpi-popover {
+      position: fixed;
+      z-index: 3000;
+      max-width: 300px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      box-shadow: var(--shadow-lg);
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.4;
+      display: none;
+    }
+    .dpi-popover.active { display: block; }
+    .dpi-popover-title {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .dpi-popover-note {
+      color: var(--text-secondary);
+      margin-top: 6px;
     }
 
     /* ── Details toggle ──────────────────────────────────────── */
@@ -776,6 +979,7 @@
       justify-content: center;
       gap: 10px;
       width: 100%;
+      min-height: 56px;
       padding: 14px 28px;
       background: var(--surface);
       color: var(--accent);
@@ -1090,6 +1294,7 @@
   </div>
 
   <div class="container">
+    <div class="dpi-popover" id="dpiPopover" role="dialog" aria-live="polite"></div>
     <div class="workflow" id="workflow">
       <div class="workflow-track">
         <div class="workflow-step active" data-step="1">
@@ -1153,8 +1358,14 @@
 
       <div class="form-grid">
         <div class="form-group">
-          <label class="form-label" for="trimWidth">Trim Width</label>
+          <label class="form-label" for="trimWidth" id="trimWidthLabel">Trim Width</label>
           <input class="form-input" type="number" id="trimWidth" value="10.5" step="0.125" min="3">
+          <div class="form-hint">inches</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="trimHeightDisplay" id="trimHeightLabel">Trim Height</label>
+          <input class="form-input" type="text" id="trimHeightDisplay" value="auto" readonly>
           <div class="form-hint">inches</div>
         </div>
 
@@ -1164,12 +1375,64 @@
           <div class="form-hint">inches (all sides)</div>
         </div>
 
+        <div class="form-group">
+          <label class="form-label" for="bleedMode">Bleed Fill Method</label>
+          <select class="form-select" id="bleedMode">
+            <option value="classic" selected>Standard Fill (fast)</option>
+            <option value="print_rescue">Print Rescue (legacy AI/local)</option>
+          </select>
+          <div class="form-hint" id="bleedModeHint">Choose Standard Fill for speed or Print Rescue for higher quality background extension.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="printRescueQuality">Print Rescue Quality</label>
+          <select class="form-select" id="printRescueQuality">
+            <option value="balanced" selected>Balanced (240 DPI)</option>
+            <option value="high">High (300 DPI)</option>
+            <option value="ultra">Ultra (360 DPI)</option>
+          </select>
+          <div class="form-hint" id="printRescueQualityHint">Used for Print Rescue bleed/fill generation.</div>
+        </div>
+
+        <div class="form-group full">
+          <div class="toggle-row" style="padding-top: 0;">
+            <div>
+              <div class="toggle-label-text">Upscale low-res content (beta)</div>
+              <div class="toggle-desc">Only pages below 240 DPI are rasterized/upscaled. Warning: vector text on affected pages may be flattened.</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="lowresUpscale">
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+        </div>
+
         <div class="form-group full">
           <label class="form-label" for="bgStyle">Background</label>
           <select class="form-select" id="bgStyle">
             <option value="auto" selected>Auto-detect from slide</option>
+            <option value="print_rescue_fill">Print Rescue Fill (sample + extend)</option>
             <option value="blue_gradient">Blue gradient (dark navy to blue)</option>
           </select>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="outputMode">Paper Size / Mode</label>
+          <select class="form-select" id="outputMode">
+            <option value="print_ready" selected>Print-Ready (current)</option>
+            <option value="us_letter_rounded">US Letter 11 x 8.5 (rounded corners)</option>
+            <option value="a4_rounded">A4 11.69 x 8.27 (rounded corners)</option>
+          </select>
+          <div class="form-hint" id="outputModeHint">
+            Current mode: bleed + crop marks for professional print/cut workflow.
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <div class="card-title" style="margin-bottom:8px;">Dimensions Summary</div>
+          <div class="form-hint"><strong>Paper Size:</strong> <span id="paperSizeIn">N/A</span> in (<span id="paperSizeCm">N/A</span> cm)</div>
+          <div class="form-hint"><strong>Artwork Size:</strong> <span id="artworkSizeIn">10.500 x auto</span> in (<span id="artworkSizeCm">26.67 x auto</span> cm)</div>
+          <div class="form-hint"><strong>Safe Margins:</strong> <span id="safeMarginsIn">Top 0.500, Bottom 0.500, Left 0.250, Right 0.250</span> in (<span id="safeMarginsCm">Top 1.27, Bottom 1.27, Left 0.64, Right 0.64</span> cm)</div>
         </div>
       </div>
 
@@ -1207,7 +1470,7 @@
             <div class="toggle-desc">Rotate every other page 180 degrees for double-sided spiral/comb binding</div>
           </div>
           <label class="toggle">
-            <input type="checkbox" id="flipEvenPages" checked>
+            <input type="checkbox" id="flipEvenPages">
             <span class="toggle-track"></span>
           </label>
         </div>
@@ -1227,11 +1490,11 @@
       <!-- Calc preview -->
       <div class="calc-bar" id="calcBar">
         <div class="calc-item">
-          <div class="calc-label">Trim Width</div>
+          <div class="calc-label" id="calcTrimWLabel">Trim Width</div>
           <div class="calc-value" id="calcTrimW">10.500"</div>
         </div>
         <div class="calc-item">
-          <div class="calc-label">Trim Height</div>
+          <div class="calc-label" id="calcTrimHLabel">Trim Height</div>
           <div class="calc-value" id="calcTrimH">auto</div>
         </div>
         <div class="calc-item">
@@ -1292,18 +1555,37 @@
     const detailsArea = $('detailsArea');
 
     const trimWidthEl = $('trimWidth');
+    const trimHeightDisplayEl = $('trimHeightDisplay');
+    const trimWidthLabelEl = $('trimWidthLabel');
+    const trimHeightLabelEl = $('trimHeightLabel');
     const bleedEl = $('bleed');
+    const bleedModeEl = $('bleedMode');
+    const bleedModeHintEl = $('bleedModeHint');
+    const printRescueQualityEl = $('printRescueQuality');
+    const printRescueQualityHintEl = $('printRescueQualityHint');
+    const lowresUpscaleEl = $('lowresUpscale');
     const bgStyleEl = $('bgStyle');
+    const outputModeEl = $('outputMode');
+    const outputModeHintEl = $('outputModeHint');
     const marginTopEl = $('marginTop');
     const marginBottomEl = $('marginBottom');
     const marginLeftEl = $('marginLeft');
     const marginRightEl = $('marginRight');
     const flipEvenEl = $('flipEvenPages');
     const insertBlankEl = $('insertBlank');
+    const paperSizeInEl = $('paperSizeIn');
+    const paperSizeCmEl = $('paperSizeCm');
+    const artworkSizeInEl = $('artworkSizeIn');
+    const artworkSizeCmEl = $('artworkSizeCm');
+    const safeMarginsInEl = $('safeMarginsIn');
+    const safeMarginsCmEl = $('safeMarginsCm');
+    const calcTrimWLabelEl = $('calcTrimWLabel');
+    const calcTrimHLabelEl = $('calcTrimHLabel');
     const calcTrimW = $('calcTrimW');
     const calcTrimH = $('calcTrimH');
     const calcBleed = $('calcBleed');
     const workflowEl = $('workflow');
+    const dpiPopover = $('dpiPopover');
 
     const dialogOverlay = $('dialogOverlay');
     const dialogTitle = $('dialogTitle');
@@ -1315,7 +1597,58 @@
     let jobId = null;
     let uploadedFilename = null;
     let previewPages = [];    // from /api/preview
+    let previewThumbs = [];   // from /api/preview
     let deletedIndices = new Set();
+    let pageOrder = [];       // array of original 0-based page indices in visual order
+    let setupCollapsed = false;
+    let detectedTrimHeightIn = null;
+    let dpiPopoverAnchor = null;
+    let reprocessBusy = false;
+    let forcedUpscaleImages = {};
+
+    function hideDpiPopover() {
+      dpiPopover.classList.remove('active');
+      dpiPopover.innerHTML = '';
+      dpiPopoverAnchor = null;
+    }
+
+    function showDpiPopover(anchorEl, title, body, note) {
+      const safeTitle = String(title || 'Resolution Info');
+      const safeBody = String(body || '');
+      const safeNote = String(note || '');
+      dpiPopover.innerHTML = `
+        <div class="dpi-popover-title">${safeTitle}</div>
+        <div>${safeBody}</div>
+        ${safeNote ? `<div class="dpi-popover-note">${safeNote}</div>` : ''}`;
+      dpiPopover.classList.add('active');
+      dpiPopoverAnchor = anchorEl;
+      const r = anchorEl.getBoundingClientRect();
+      const top = Math.min(window.innerHeight - 12, r.bottom + 10);
+      const left = Math.max(12, Math.min(window.innerWidth - 312, r.left - 10));
+      dpiPopover.style.top = `${top}px`;
+      dpiPopover.style.left = `${left}px`;
+    }
+
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('.dpi-indicator');
+      if (trigger) {
+        e.preventDefault();
+        const title = trigger.getAttribute('data-help-title') || 'Resolution Info';
+        const body = trigger.getAttribute('data-help-body') || '';
+        const note = trigger.getAttribute('data-help-note') || '';
+        if (dpiPopoverAnchor === trigger && dpiPopover.classList.contains('active')) {
+          hideDpiPopover();
+        } else {
+          showDpiPopover(trigger, title, body, note);
+        }
+        return;
+      }
+      if (dpiPopover.classList.contains('active') && !e.target.closest('#dpiPopover')) {
+        hideDpiPopover();
+      }
+    });
+    window.addEventListener('resize', hideDpiPopover);
+    window.addEventListener('scroll', hideDpiPopover, true);
 
     function setWorkflowStep(step) {
       const nodes = workflowEl.querySelectorAll('.workflow-step');
@@ -1340,9 +1673,16 @@
       if (fileInput.files.length) handleFile(fileInput.files[0]);
     });
     removeFile.addEventListener('click', clearFile);
+    outputModeEl.addEventListener('change', updateOutputModeUI);
+    bleedModeEl.addEventListener('change', updateOutputModeUI);
+    printRescueQualityEl.addEventListener('change', updateOutputModeUI);
+    bgStyleEl.addEventListener('change', updateOutputModeUI);
+    updateOutputModeUI();
 
     function handleFile(file) {
       selectedFile = file;
+      detectedTrimHeightIn = null;
+      forcedUpscaleImages = {};
       fileName.textContent = file.name;
       fileSize.textContent = formatSize(file.size);
       fileInfo.classList.add('active');
@@ -1356,21 +1696,40 @@
       jobId = null;
       uploadedFilename = null;
       previewPages = [];
+      previewThumbs = [];
+      pageOrder = [];
       deletedIndices.clear();
+      detectedTrimHeightIn = null;
+      forcedUpscaleImages = {};
       fileInput.value = '';
       fileInfo.classList.remove('active');
+      setSetupCollapsed(false);
       pagesGrid.classList.remove('active');
       settingsCard.style.display = 'none';
       processBtn.disabled = true;
       results.classList.remove('active');
       errorMsg.classList.remove('active');
       setWorkflowStep(1);
+      updateOutputModeUI();
     }
 
     function formatSize(bytes) {
       if (bytes < 1024) return bytes + ' B';
       if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    function setSetupCollapsed(collapsed) {
+      setupCollapsed = !!collapsed;
+      if (setupCollapsed) {
+        pagesGrid.classList.remove('active');
+        settingsCard.style.display = 'none';
+        return;
+      }
+      if (previewPages.length) {
+        pagesGrid.classList.add('active');
+        settingsCard.style.display = '';
+      }
     }
 
     // ── Upload & preview ───────────────────────────────────────────────
@@ -1395,39 +1754,80 @@
         jobId = data.job_id;
         uploadedFilename = data.filename;
         previewPages = data.pages;
+        previewThumbs = data.thumbnails;
+        pageOrder = data.pages.map((_, i) => i);
         deletedIndices.clear();
 
-        renderPreviewThumbs(data.thumbnails, data.pages);
-        settingsCard.style.display = '';
+        setSetupCollapsed(false);
+        renderPreviewThumbs();
         processBtn.disabled = false;
         updateCalcPreview();
         setWorkflowStep(2);
       } catch (err) {
-        showError(err.message || 'Upload failed');
+        showError(err.message || 'Upload failed', false);
       }
     }
 
-    function renderPreviewThumbs(thumbs, pages) {
+    function reorderPageOrder(draggedOriginalIdx, targetOriginalIdx) {
+      const from = pageOrder.indexOf(draggedOriginalIdx);
+      const to = pageOrder.indexOf(targetOriginalIdx);
+      if (from < 0 || to < 0 || from === to) return;
+      const [moved] = pageOrder.splice(from, 1);
+      pageOrder.splice(to, 0, moved);
+    }
+
+    function renderPreviewThumbs() {
       pagesScroll.innerHTML = '';
-      pages.forEach((pg, i) => {
+      let draggedOriginalIdx = null;
+      pageOrder.forEach((originalIdx, visualIdx) => {
+        const pg = previewPages[originalIdx];
+        const thumb = previewThumbs[originalIdx];
         const card = document.createElement('div');
         card.className = 'page-card';
-        card.dataset.index = i;
+        card.dataset.index = String(visualIdx);
+        card.dataset.originalIndex = String(originalIdx);
+        card.draggable = true;
         card.innerHTML = `
           <div class="page-thumb">
-            <img class="page-thumb-img" src="data:image/png;base64,${thumbs[i]}" alt="Page ${i+1}">
-            <span class="page-badge">${i + 1}</span>
-            <button class="page-delete-btn" title="Remove page" data-index="${i}">
+            <img class="page-thumb-img" src="data:image/png;base64,${thumb}" alt="Page ${visualIdx + 1}">
+            <span class="page-badge">${visualIdx + 1}</span>
+            <button class="page-delete-btn" title="Remove page" data-index="${originalIdx}">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
                 <path d="M2 3.5h10M5.5 3.5V2a1 1 0 011-1h1a1 1 0 011 1v1.5M11 3.5l-.5 8a1.5 1.5 0 01-1.5 1.5H5A1.5 1.5 0 013.5 11.5L3 3.5M5.5 6v4M8.5 6v4"/>
               </svg>
             </button>
           </div>
           <div class="page-info">
-            <span class="page-label">Page ${i+1}</span>
+            <span class="page-label">Page ${visualIdx + 1}</span>
             <span class="page-dims">${pg.width_in}" x ${pg.height_in}"</span>
             <span class="page-deleted-label">Removed</span>
           </div>`;
+        if (deletedIndices.has(originalIdx)) {
+          card.classList.add('deleted');
+        }
+        card.addEventListener('dragstart', () => {
+          draggedOriginalIdx = originalIdx;
+          card.classList.add('dragging');
+        });
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          pagesScroll.querySelectorAll('.page-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+        });
+        card.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (draggedOriginalIdx === null || draggedOriginalIdx === originalIdx) return;
+          card.classList.add('drag-over');
+        });
+        card.addEventListener('dragleave', () => {
+          card.classList.remove('drag-over');
+        });
+        card.addEventListener('drop', (e) => {
+          e.preventDefault();
+          card.classList.remove('drag-over');
+          if (draggedOriginalIdx === null || draggedOriginalIdx === originalIdx) return;
+          reorderPageOrder(draggedOriginalIdx, originalIdx);
+          renderPreviewThumbs();
+        });
         pagesScroll.appendChild(card);
       });
 
@@ -1436,7 +1836,7 @@
         btn.addEventListener('click', e => {
           e.stopPropagation();
           const idx = parseInt(btn.dataset.index);
-          const card = pagesScroll.querySelector(`.page-card[data-index="${idx}"]`);
+          const card = pagesScroll.querySelector(`.page-card[data-original-index="${idx}"]`);
           if (deletedIndices.has(idx)) {
             // Restore
             deletedIndices.delete(idx);
@@ -1448,42 +1848,55 @@
         });
       });
 
-      pagesGrid.classList.add('active');
+      if (!setupCollapsed) {
+        pagesGrid.classList.add('active');
+      }
     }
 
-    // ── Delete dialog ──────────────────────────────────────────────────
-    let pendingDeleteIdx = null;
-    let pendingDeleteCard = null;
+    // ── Confirmation dialog ───────────────────────────────────────────
+    let pendingConfirmAction = null;
 
-    function showDeleteDialog(idx, card) {
-      pendingDeleteIdx = idx;
-      pendingDeleteCard = card;
-      dialogTitle.textContent = `Remove Page ${idx + 1}?`;
-      dialogMessage.textContent = 'This page will be excluded from the final print-ready PDF. You can restore it by clicking the page again.';
+    function resetDialog() {
+      dialogOverlay.classList.remove('active');
+      pendingConfirmAction = null;
+      dialogConfirm.textContent = 'Confirm';
+    }
+
+    function showConfirmDialog(title, message, confirmLabel, onConfirm) {
+      dialogTitle.textContent = title || 'Confirm?';
+      dialogMessage.textContent = message || '';
+      dialogConfirm.textContent = confirmLabel || 'Confirm';
+      pendingConfirmAction = (typeof onConfirm === 'function') ? onConfirm : null;
       dialogOverlay.classList.add('active');
     }
 
+    function showDeleteDialog(idx, card) {
+      showConfirmDialog(
+        `Remove Page ${idx + 1}?`,
+        'This page will be excluded from the final print-ready PDF. You can restore it by clicking the page again.',
+        'Remove',
+        () => {
+          deletedIndices.add(idx);
+          card.classList.add('deleted');
+        }
+      );
+    }
+
     dialogCancel.addEventListener('click', () => {
-      dialogOverlay.classList.remove('active');
-      pendingDeleteIdx = null;
-      pendingDeleteCard = null;
+      resetDialog();
     });
 
     dialogConfirm.addEventListener('click', () => {
-      if (pendingDeleteIdx !== null && pendingDeleteCard) {
-        deletedIndices.add(pendingDeleteIdx);
-        pendingDeleteCard.classList.add('deleted');
+      const fn = pendingConfirmAction;
+      resetDialog();
+      if (fn) {
+        fn();
       }
-      dialogOverlay.classList.remove('active');
-      pendingDeleteIdx = null;
-      pendingDeleteCard = null;
     });
 
     dialogOverlay.addEventListener('click', e => {
       if (e.target === dialogOverlay) {
-        dialogOverlay.classList.remove('active');
-        pendingDeleteIdx = null;
-        pendingDeleteCard = null;
+        resetDialog();
       }
     });
 
@@ -1491,12 +1904,345 @@
     [trimWidthEl, bleedEl, marginTopEl, marginBottomEl, marginLeftEl, marginRightEl]
       .forEach(el => el.addEventListener('input', updateCalcPreview));
 
+    function updateOutputModeUI() {
+      const mode = outputModeEl.value;
+      const letterMode = mode === 'us_letter_rounded';
+      const a4Mode = mode === 'a4_rounded';
+      const homeMode = letterMode || a4Mode;
+      const sizeLabel = homeMode ? 'Artwork' : 'Trim';
+      trimWidthLabelEl.textContent = `${sizeLabel} Width`;
+      trimHeightLabelEl.textContent = `${sizeLabel} Height`;
+      calcTrimWLabelEl.textContent = `${sizeLabel} Width`;
+      calcTrimHLabelEl.textContent = `${sizeLabel} Height`;
+      trimWidthEl.disabled = homeMode;
+      trimHeightDisplayEl.disabled = homeMode;
+      bleedEl.disabled = homeMode;
+      bleedModeEl.disabled = homeMode;
+      const rescueQualityEnabled = (!homeMode && bleedModeEl.value === 'print_rescue') || bgStyleEl.value === 'print_rescue_fill';
+      printRescueQualityEl.disabled = !rescueQualityEnabled;
+      lowresUpscaleEl.disabled = false;
+      marginTopEl.disabled = homeMode;
+      marginBottomEl.disabled = homeMode;
+      marginLeftEl.disabled = homeMode;
+      marginRightEl.disabled = homeMode;
+
+      if (letterMode) {
+        trimWidthEl.value = '10.5';
+        trimHeightDisplayEl.value = '7.5';
+        bleedEl.value = '0';
+        marginTopEl.value = '0.5';
+        marginBottomEl.value = '0.5';
+        marginLeftEl.value = '0.25';
+        marginRightEl.value = '0.25';
+        bleedModeEl.value = 'classic';
+        bleedModeHintEl.textContent = 'Bleed fill method is disabled for fixed paper modes.';
+        printRescueQualityHintEl.textContent = bgStyleEl.value === 'print_rescue_fill'
+          ? 'Quality applies to Print Rescue background fill.'
+          : 'Quality not used unless Print Rescue background fill is selected.';
+        outputModeHintEl.textContent =
+          'US Letter mode: fixed 11 x 8.5 paper with rounded corners and no trim step.';
+      } else if (a4Mode) {
+        trimWidthEl.value = '11.1929';
+        trimHeightDisplayEl.value = '7.2677';
+        bleedEl.value = '0';
+        marginTopEl.value = '0.5';
+        marginBottomEl.value = '0.5';
+        marginLeftEl.value = '0.25';
+        marginRightEl.value = '0.25';
+        bleedModeEl.value = 'classic';
+        bleedModeHintEl.textContent = 'Bleed fill method is disabled for fixed paper modes.';
+        printRescueQualityHintEl.textContent = bgStyleEl.value === 'print_rescue_fill'
+          ? 'Quality applies to Print Rescue background fill.'
+          : 'Quality not used unless Print Rescue background fill is selected.';
+        outputModeHintEl.textContent =
+          'A4 mode: fixed 11.69 x 8.27 paper with rounded corners and no trim step.';
+      } else {
+        if (bleedEl.value === '0') bleedEl.value = '0.125';
+        trimHeightDisplayEl.value = 'auto';
+        if (bleedModeEl.value === 'print_rescue') {
+          bleedModeHintEl.textContent = 'Print Rescue mode uses reflective extension plus optional upscaler smoothing.';
+        } else {
+          bleedModeHintEl.textContent = 'Standard mode uses fast background fill for the bleed area.';
+        }
+        printRescueQualityHintEl.textContent = rescueQualityEnabled
+          ? 'Higher quality improves bleed/fill detail but takes longer.'
+          : 'Quality is used only with Print Rescue bleed/fill.';
+        outputModeHintEl.textContent =
+          'Current mode: bleed + crop marks for professional print/cut workflow.';
+      }
+      updateCalcPreview();
+      updateDimensionsSummary();
+    }
+
     function updateCalcPreview() {
+      const mode = outputModeEl.value;
+      const letterMode = mode === 'us_letter_rounded';
+      const a4Mode = mode === 'a4_rounded';
+      const homeMode = letterMode || a4Mode;
       const tw = parseFloat(trimWidthEl.value) || 10.5;
       const bl = parseFloat(bleedEl.value) || 0.125;
       calcTrimW.textContent = tw.toFixed(3) + '"';
-      calcBleed.textContent = bl.toFixed(3) + '"';
-      calcTrimH.textContent = 'auto';
+      calcBleed.textContent = (homeMode ? 0 : bl).toFixed(3) + '"';
+      if (letterMode) {
+        calcTrimH.textContent = '7.500"';
+      } else if (a4Mode) {
+        calcTrimH.textContent = '7.268"';
+      } else {
+        calcTrimH.textContent = detectedTrimHeightIn ? `${Number(detectedTrimHeightIn).toFixed(3)}"` : 'auto';
+      }
+      trimHeightDisplayEl.value = homeMode
+        ? (letterMode ? '7.5' : '7.2677')
+        : (detectedTrimHeightIn ? Number(detectedTrimHeightIn).toFixed(4) : 'auto');
+      updateDimensionsSummary();
+    }
+
+    function fmtIn(n) {
+      return Number(n).toFixed(3);
+    }
+
+    function fmtCm(n) {
+      return Number(n * 2.54).toFixed(2);
+    }
+
+    function updateDimensionsSummary() {
+      const mode = outputModeEl.value;
+      const letterMode = mode === 'us_letter_rounded';
+      const a4Mode = mode === 'a4_rounded';
+      const homeMode = letterMode || a4Mode;
+      const tw = parseFloat(trimWidthEl.value) || 10.5;
+      const th = homeMode
+        ? (letterMode ? 7.5 : 7.2677)
+        : (detectedTrimHeightIn ? Number(detectedTrimHeightIn) : null);
+      const mt = parseFloat(marginTopEl.value) || 0;
+      const mb = parseFloat(marginBottomEl.value) || 0;
+      const ml = parseFloat(marginLeftEl.value) || 0;
+      const mr = parseFloat(marginRightEl.value) || 0;
+
+      if (letterMode) {
+        paperSizeInEl.textContent = '11.000 x 8.500';
+        paperSizeCmEl.textContent = `${fmtCm(11)} x ${fmtCm(8.5)}`;
+      } else if (a4Mode) {
+        paperSizeInEl.textContent = '11.693 x 8.268';
+        paperSizeCmEl.textContent = '29.70 x 21.00';
+      } else {
+        paperSizeInEl.textContent = 'N/A (print-ready workflow)';
+        paperSizeCmEl.textContent = 'N/A';
+      }
+
+      if (th === null) {
+        artworkSizeInEl.textContent = `${fmtIn(tw)} x auto`;
+        artworkSizeCmEl.textContent = `${fmtCm(tw)} x auto`;
+      } else {
+        artworkSizeInEl.textContent = `${fmtIn(tw)} x ${fmtIn(th)}`;
+        artworkSizeCmEl.textContent = `${fmtCm(tw)} x ${fmtCm(th)}`;
+      }
+
+      safeMarginsInEl.textContent = `Top ${fmtIn(mt)}, Bottom ${fmtIn(mb)}, Left ${fmtIn(ml)}, Right ${fmtIn(mr)}`;
+      safeMarginsCmEl.textContent = `Top ${fmtCm(mt)}, Bottom ${fmtCm(mb)}, Left ${fmtCm(ml)}, Right ${fmtCm(mr)}`;
+    }
+
+    function getDpiMeta(pg) {
+      const contentMin = Number(pg && pg.content_raster_min_dpi);
+      const hasContentRaster = Boolean(pg && pg.content_has_raster && Number.isFinite(contentMin));
+      if (!pg || !hasContentRaster) {
+        return {
+          level: 'good',
+          icon: '✓',
+          text: 'Content: vector-only',
+          tooltip: 'Vector-only content: best for print. No bitmap resolution limit detected in main page content.',
+          helpTitle: 'Vector Content',
+          helpBody: 'This page content is vector-based (text/shapes/lines). Vector graphics stay sharp at print size.',
+          helpNote: getContentPrintGuidance(pg),
+        };
+      }
+      const dpi = contentMin;
+      if (dpi >= 240) {
+        return {
+          level: 'good',
+          icon: '✓',
+          text: `Content min: ${dpi.toFixed(0)} DPI (Good)`,
+          tooltip: 'Green check: good print quality. Minimum raster in page content is at or above 240 DPI.',
+          helpTitle: 'Raster Content (Good)',
+          helpBody: `Bitmap content on this page is at least ${dpi.toFixed(0)} DPI at print size.`,
+          helpNote: getContentPrintGuidance(pg),
+        };
+      }
+      if (dpi >= 180) {
+        return {
+          level: 'medium',
+          icon: '!',
+          text: `Content min: ${dpi.toFixed(0)} DPI (Medium)`,
+          tooltip: 'Yellow: usable for many print jobs, but fine detail in page content may look softer than high DPI.',
+          helpTitle: 'Raster Content (Medium)',
+          helpBody: `Bitmap content on this page is about ${dpi.toFixed(0)} DPI at print size.`,
+          helpNote: getContentPrintGuidance(pg),
+        };
+      }
+      return {
+        level: 'low',
+        icon: '!',
+        text: `Content min: ${dpi.toFixed(0)} DPI (Low)`,
+        tooltip: 'Red: likely too low for sharp print. Consider replacing low-resolution raster assets in page content.',
+        helpTitle: 'Raster Content (Low)',
+        helpBody: `Bitmap content on this page is about ${dpi.toFixed(0)} DPI at print size.`,
+        helpNote: getContentPrintGuidance(pg),
+      };
+    }
+
+    function getContentTypeMeta(pg) {
+      const t = (pg && pg.content_type) || 'unknown';
+      if (t === 'mixed') {
+        return 'Content: Mixed (Vector + Raster)';
+      }
+      if (t === 'vector_only') {
+        return 'Content: Vector-only';
+      }
+      if (t === 'raster_only') {
+        return 'Content: Raster-only';
+      }
+      return 'Content: Unknown';
+    }
+
+    function formatPhotoCount(n) {
+      return n === 1 ? '1 photo' : `${n} photos`;
+    }
+
+    function formatDpiList(values) {
+      const arr = (Array.isArray(values) ? values : [])
+        .map(v => Number(v))
+        .filter(v => Number.isFinite(v) && v > 0)
+        .slice(0, 4);
+      if (!arr.length) return '';
+      if (arr.length === 1) return `${arr[0].toFixed(0)} DPI`;
+      return `${arr[0].toFixed(0)}-${arr[arr.length - 1].toFixed(0)} DPI`;
+    }
+
+    function getContentPrintGuidance(pg) {
+      if (!pg) return 'Content guidance unavailable.';
+      const hasVector = !!pg.has_vector_content;
+      const rasterCount = Number(pg.content_raster_count || 0);
+      const minDpi = Number(pg.content_raster_min_dpi);
+      const dpiRange = formatDpiList(pg.content_raster_dpi_samples);
+
+      if (rasterCount <= 0 && hasVector) {
+        return 'Vector content detected and should print sharply.';
+      }
+      if (rasterCount <= 0) {
+        return 'No large raster images were detected in page content.';
+      }
+
+      const photoPart = rasterCount === 1
+        ? `${formatPhotoCount(rasterCount)} is ${dpiRange || `${minDpi.toFixed(0)} DPI`}`
+        : `${formatPhotoCount(rasterCount)} are around ${dpiRange || `${minDpi.toFixed(0)} DPI`}`;
+      const vectorPart = hasVector ? ' Other content is vector and should print well.' : '';
+
+      if (minDpi >= 240) {
+        return `${photoPart}.${vectorPart}`;
+      }
+      if (minDpi >= 200) {
+        return `${photoPart}.${vectorPart} This may print fine, but 240 DPI+ is recommended for best results.`;
+      }
+      return `${photoPart}.${vectorPart} For better quality, consider a higher-resolution image or enable Upscale low-res content (beta).`;
+    }
+
+    function imageDpiLevel(dpi) {
+      const v = Number(dpi);
+      if (!Number.isFinite(v)) return { key: 'okay', label: 'Unknown' };
+      if (v >= 240) return { key: 'good', label: 'Good' };
+      if (v >= 200) return { key: 'okay', label: 'Okay' };
+      return { key: 'low', label: 'Attention' };
+    }
+
+    function renderImageDetails(pg, scope) {
+      const images = Array.isArray(pg && pg.content_images) ? pg.content_images : [];
+      if (!images.length) return '';
+      const panelId = `imgDetails-${scope}-${pg.page}`;
+      const progressId = `upProg-${scope}-${pg.page}`;
+      const rows = images.map((img) => {
+        const lvl = imageDpiLevel(img.dpi);
+        const thumb = img.thumb_b64
+          ? `<img class="image-detail-thumb" src="data:image/png;base64,${img.thumb_b64}" alt="Image ${img.index}">`
+          : `<div class="image-detail-thumb"></div>`;
+        const canUpscale = Number(img.dpi) < 240;
+        const action = canUpscale
+          ? `<button class="image-upscale-btn" title="Upscales the full page to improve this image." data-upscale-page="${pg.page}" data-upscale-image="${img.index}" data-upscale-progress="${progressId}">Upscale Page</button>`
+          : '';
+        return `<div class="image-detail-row">${thumb}<div class="image-detail-text">${Number(img.dpi).toFixed(0)} DPI (${img.width_px}x${img.height_px}px)</div><span class="image-detail-tag ${lvl.key}">${lvl.label}</span>${action}</div>`;
+      }).join('');
+      return `
+        <button class="image-details-toggle" data-panel="${panelId}">
+          <span class="arr">▸</span><span>Image details (${images.length})</span>
+        </button>
+        <div class="image-details-panel" id="${panelId}">
+          ${rows}
+          <div class="image-upscale-row">
+            <div class="mini-progress" id="${progressId}">
+              <div class="mini-progress-track"><div class="mini-progress-bar"></div></div>
+              <div class="mini-progress-text"></div>
+            </div>
+          </div>
+          <div class="image-upscale-note">Upscale Page (beta) applies to the full page, not only one image. Results can vary by slide design.</div>
+        </div>`;
+    }
+
+    function getBleedFillMeta(pg) {
+      if (!pg || pg.layout_mode !== 'print_ready') return null;
+      const dpi = Number(pg && pg.bleed_fill_raster_min_dpi);
+      if (!Number.isFinite(dpi) || dpi <= 0) return null;
+      if (dpi >= 240) {
+        return {
+          level: 'good',
+          icon: '✓',
+          text: `Bleed fill: ${dpi.toFixed(0)} DPI`,
+          tooltip: 'Green check: generated bleed/fill raster is at or above 240 DPI.',
+          helpTitle: 'Bleed Fill (Good)',
+          helpBody: `Generated bleed area is about ${dpi.toFixed(0)} DPI.`,
+          helpNote: 'For most print jobs this is sufficient.',
+        };
+      }
+      if (dpi >= 180) {
+        return {
+          level: 'medium',
+          icon: '!',
+          text: `Bleed fill: ${dpi.toFixed(0)} DPI`,
+          tooltip: 'Yellow: bleed/fill raster is moderate quality.',
+          helpTitle: 'Bleed Fill (Medium)',
+          helpBody: `Generated bleed area is about ${dpi.toFixed(0)} DPI.`,
+          helpNote: 'You can increase Print Rescue quality to High or Ultra for more detail.',
+        };
+      }
+      return {
+        level: 'low',
+        icon: '!',
+        text: `Bleed fill: ${dpi.toFixed(0)} DPI`,
+        tooltip: 'Red: bleed/fill raster is low quality for print.',
+        helpTitle: 'Bleed Fill (Low)',
+        helpBody: `Generated bleed area is about ${dpi.toFixed(0)} DPI.`,
+        helpNote: 'Use High/Ultra quality or reduce bleed complexity.',
+      };
+    }
+
+    function estimateJobSeconds() {
+      const deleted = deletedIndices.size;
+      const total = Math.max(1, previewPages.length - deleted + (insertBlankEl.checked ? 1 : 0));
+      const mode = outputModeEl.value;
+      const rescue = (bleedModeEl.value === 'print_rescue') || bgStyleEl.value === 'print_rescue_fill';
+      let perPage = 0.85;
+      if (rescue) {
+        const q = printRescueQualityEl.value;
+        perPage = q === 'ultra' ? 3.6 : (q === 'high' ? 2.8 : 2.0);
+      }
+      if (lowresUpscaleEl.checked) perPage += 1.2;
+      if (mode !== 'print_ready') perPage += 0.4;
+      return Math.round(4 + total * perPage);
+    }
+
+    function estimateJobText() {
+      const sec = estimateJobSeconds();
+      const q = printRescueQualityEl.value;
+      const rescue = (bleedModeEl.value === 'print_rescue') || bgStyleEl.value === 'print_rescue_fill';
+      if (!rescue) return `Starting processing... Estimated ~${formatEta(sec)}`;
+      return `Starting ${q} quality processing... Estimated ~${formatEta(sec)}`;
     }
 
     function formatEta(seconds) {
@@ -1517,10 +2263,7 @@
       progressText.textContent = eta ? `${base} · ~${eta} remaining` : base;
     }
 
-    // ── Process ────────────────────────────────────────────────────────
-    processBtn.addEventListener('click', async () => {
-      if (!jobId) return;
-
+    function buildProcessForm(forcedPages = []) {
       const form = new FormData();
       form.append('job_id', jobId);
       form.append('filename', uploadedFilename || 'output.pdf');
@@ -1531,9 +2274,31 @@
       form.append('margin_left', marginLeftEl.value);
       form.append('margin_right', marginRightEl.value);
       form.append('bg_style', bgStyleEl.value);
+      form.append('bleed_mode', bleedModeEl.value);
+      form.append('ai_provider', 'print_rescue_local');
+      form.append('print_rescue_quality', printRescueQualityEl.value);
+      form.append('lowres_upscale', lowresUpscaleEl.checked ? 'true' : 'false');
+      form.append('lowres_threshold_dpi', '240');
+      form.append('forced_upscale_pages', JSON.stringify(forcedPages));
+      const forcedImagePayload = Object.entries(forcedUpscaleImages || {}).map(([page, imgs]) => ({
+        page: Number(page),
+        images: Array.from(imgs || []).map(Number).filter(v => Number.isFinite(v) && v > 0).sort((a, b) => a - b),
+      })).filter(x => x.images.length > 0);
+      form.append('forced_upscale_images', JSON.stringify(forcedImagePayload));
+      form.append('output_mode', outputModeEl.value);
       form.append('flip_even_pages', flipEvenEl.checked ? 'true' : 'false');
       form.append('insert_blank_after_cover', insertBlankEl.checked ? 'true' : 'false');
       form.append('delete_pages', JSON.stringify([...deletedIndices]));
+      form.append('page_order', JSON.stringify(pageOrder));
+      return form;
+    }
+
+    // ── Process ────────────────────────────────────────────────────────
+    processBtn.addEventListener('click', async () => {
+      if (!jobId || reprocessBusy) return;
+      reprocessBusy = true;
+
+      const form = buildProcessForm([]);
 
       processBtn.disabled = true;
       setWorkflowStep(3);
@@ -1542,13 +2307,33 @@
       progressText.textContent = 'Starting...';
       errorMsg.classList.remove('active');
       results.classList.remove('active');
+      setSetupCollapsed(true);
 
       let progressTimer = null;
+      let optimisticTimer = null;
+      let optimisticPct = 3;
+      progressBar.style.width = `${optimisticPct}%`;
+      progressText.textContent = estimateJobText();
+      optimisticTimer = setInterval(() => {
+        optimisticPct = Math.min(35, optimisticPct + 1.2);
+        const current = Number((progressBar.style.width || '0').replace('%', '')) || 0;
+        if (current < optimisticPct) {
+          progressBar.style.width = `${optimisticPct.toFixed(0)}%`;
+          progressText.textContent = 'Preparing pages...';
+        }
+      }, 400);
+
       const pollProgress = async () => {
         try {
           const r = await fetch(`/api/progress/${jobId}`);
           const p = await r.json();
-          if (!p.error) applyProgressUpdate(p);
+          if (!p.error) {
+            if (optimisticTimer) {
+              clearInterval(optimisticTimer);
+              optimisticTimer = null;
+            }
+            applyProgressUpdate(p);
+          }
         } catch (_) {
           // Ignore transient polling errors.
         }
@@ -1560,23 +2345,92 @@
         const resp = await fetch('/api/process', { method: 'POST', body: form });
         const response = await resp.json();
 
-        if (response.error) { showError(response.error); return; }
+        if (response.error) { showError(response.error, true); return; }
         progressBar.style.width = '100%';
         progressText.textContent = 'Complete';
         renderResults(response);
       } catch (err) {
-        showError(err.message || 'Something went wrong');
+        showError(err.message || 'Something went wrong', true);
       } finally {
         if (progressTimer) clearInterval(progressTimer);
+        if (optimisticTimer) clearInterval(optimisticTimer);
         processBtn.disabled = false;
+        reprocessBusy = false;
         setTimeout(() => progressWrap.classList.remove('active'), 1200);
       }
     });
 
-    function showError(msg) {
+    function showError(msg, restoreSetup = false) {
       errorMsg.textContent = msg;
       errorMsg.classList.add('active');
       progressWrap.classList.remove('active');
+      if (restoreSetup) {
+        setSetupCollapsed(false);
+      }
+    }
+
+    async function upscaleSinglePage(pageNumber, imageIndex, buttonEl, miniWrap) {
+      if (!jobId || reprocessBusy) return;
+      reprocessBusy = true;
+      processBtn.disabled = true;
+      if (buttonEl) buttonEl.disabled = true;
+      const bar = miniWrap ? miniWrap.querySelector('.mini-progress-bar') : null;
+      const txt = miniWrap ? miniWrap.querySelector('.mini-progress-text') : null;
+      if (miniWrap) miniWrap.classList.add('active');
+      if (bar) bar.style.width = '4%';
+      if (txt) txt.textContent = '4%';
+
+      const poll = async () => {
+        try {
+          const r = await fetch(`/api/progress/${jobId}`);
+          const p = await r.json();
+          const pct = Math.max(4, Math.min(99, Number(p.percent || 0)));
+          if (bar) bar.style.width = `${pct}%`;
+          if (txt) txt.textContent = `${Math.round(pct)}%`;
+        } catch (_) {}
+      };
+
+      let timer = setInterval(poll, 650);
+      await poll();
+      // Add this image selection cumulatively so previous choices persist.
+      const pKey = String(pageNumber);
+      const prev = new Set(forcedUpscaleImages[pKey] || []);
+      const hadAlready = prev.has(Number(imageIndex));
+      prev.add(Number(imageIndex));
+      forcedUpscaleImages[pKey] = prev;
+      try {
+        const form = buildProcessForm([]);
+        // Disable global auto-upscale for this targeted action.
+        form.set('lowres_upscale', 'false');
+        const resp = await fetch('/api/process', { method: 'POST', body: form });
+        const response = await resp.json();
+        if (response.error) {
+          showError(response.error, false);
+          return;
+        }
+        if (bar) bar.style.width = '100%';
+        if (txt) txt.textContent = '100%';
+        renderResults(response);
+      } catch (err) {
+        // Roll back optimistic selection if request failed.
+        if (!hadAlready) {
+          const cur = new Set(forcedUpscaleImages[pKey] || []);
+          cur.delete(Number(imageIndex));
+          forcedUpscaleImages[pKey] = cur;
+        }
+        showError(err.message || 'Unable to upscale page', false);
+      } finally {
+        clearInterval(timer);
+        reprocessBusy = false;
+        processBtn.disabled = false;
+        if (miniWrap) {
+          setTimeout(() => {
+            miniWrap.classList.remove('active');
+            if (bar) bar.style.width = '0%';
+            if (txt) txt.textContent = '';
+          }, 600);
+        }
+      }
     }
 
     // ── Render results ─────────────────────────────────────────────────
@@ -1584,6 +2438,10 @@
       const totalPages = data.pages.length;
       const allPassed = data.verification.every(v => v.all_pass);
       const dlName = encodeURIComponent(data.filename || 'output');
+      if (Number.isFinite(Number(data.trim_height_in))) {
+        detectedTrimHeightIn = Number(data.trim_height_in);
+        updateCalcPreview();
+      }
       flipbookPageMeta = Array.isArray(data.pages) ? data.pages : [];
       flipEvenPagesSetting = flipbookPageMeta.some(pg => pg && pg.flipped === true);
 
@@ -1604,15 +2462,26 @@
         const thumb = data.thumbnails[i];
         const flipped = pg.flipped;
         const isBlank = pg.is_blank;
+        const dpiMeta = getDpiMeta(pg);
+        const bleedMeta = getBleedFillMeta(pg);
         thumbHtml += `
           <div class="output-thumb-card">
             <img class="output-thumb-img" src="data:image/png;base64,${thumb}" alt="Page ${pg.page}">
-            <div class="output-thumb-info">
-              <div class="output-thumb-label">Page ${pg.page}${isBlank ? ' (Blank)' : ''}</div>
-              <div class="output-thumb-meta">${pg.trim_size}</div>
-              ${flipped ? '<div class="output-thumb-flipped">Flipped 180&deg;</div>' : ''}
-            </div>
-          </div>`;
+              <div class="output-thumb-info">
+                <div class="output-thumb-label">Page ${pg.page}${isBlank ? ' (Blank)' : ''}</div>
+                <div class="output-thumb-meta">${pg.trim_size}</div>
+                <div class="output-thumb-meta">${getContentTypeMeta(pg)}</div>
+                <div class="output-thumb-meta">${getContentPrintGuidance(pg)}</div>
+                <div class="output-thumb-meta dpi-meta">
+                  <span class="dpi-indicator ${dpiMeta.level}" title="${dpiMeta.tooltip}" data-help-title="${dpiMeta.helpTitle}" data-help-body="${dpiMeta.helpBody}" data-help-note="${dpiMeta.helpNote}">${dpiMeta.icon}</span>
+                  <span>${dpiMeta.text}</span>
+                </div>
+                ${bleedMeta ? `<div class="output-thumb-meta dpi-meta"><span class="dpi-indicator ${bleedMeta.level}" title="${bleedMeta.tooltip}" data-help-title="${bleedMeta.helpTitle}" data-help-body="${bleedMeta.helpBody}" data-help-note="${bleedMeta.helpNote}">${bleedMeta.icon}</span><span>${bleedMeta.text}</span></div>` : ''}
+                ${renderImageDetails(pg, 'preview')}
+                ${pg.content_upscaled ? '<div class="output-thumb-meta">Content upscaled (beta): page was rasterized below 240 DPI</div>' : ''}
+                ${flipped ? '<div class="output-thumb-flipped">Flipped 180&deg;</div>' : ''}
+              </div>
+            </div>`;
       });
       thumbHtml += '</div></div>';
       outputThumbs.innerHTML = thumbHtml;
@@ -1626,6 +2495,8 @@
         <div class="details-container" id="detailsContainer"><div class="details-inner">`;
 
       data.pages.forEach(pg => {
+        const contentMeta = getDpiMeta(pg);
+        const bleedMeta = getBleedFillMeta(pg);
         html += `
           <div class="result-card">
             <h3>Page ${pg.page}${pg.is_blank ? ' (Blank)' : ''}</h3>
@@ -1636,7 +2507,13 @@
               <div class="stat"><div class="label">Safe Area</div><div class="value">${pg.safe_area}</div></div>
               <div class="stat"><div class="label">Scale</div><div class="value">${pg.scale_factor}</div></div>
               <div class="stat"><div class="label">Background</div><div class="value">${pg.background_color}</div></div>
+              <div class="stat"><div class="label">Content Type</div><div class="value">${getContentTypeMeta(pg).replace('Content: ', '')}</div></div>
+              <div class="stat"><div class="label">Print Guidance</div><div class="value">${getContentPrintGuidance(pg)}</div></div>
+              <div class="stat"><div class="label">Content DPI</div><div class="value"><span class="dpi-indicator ${contentMeta.level}" title="${contentMeta.tooltip}" data-help-title="${contentMeta.helpTitle}" data-help-body="${contentMeta.helpBody}" data-help-note="${contentMeta.helpNote}">${contentMeta.icon}</span> ${contentMeta.text}</div></div>
+              <div class="stat"><div class="label">Bleed Fill DPI</div><div class="value">${bleedMeta ? `<span class="dpi-indicator ${bleedMeta.level}" title="${bleedMeta.tooltip}" data-help-title="${bleedMeta.helpTitle}" data-help-body="${bleedMeta.helpBody}" data-help-note="${bleedMeta.helpNote}">${bleedMeta.icon}</span> ${bleedMeta.text}` : 'N/A'}</div></div>
+              <div class="stat"><div class="label">Upscale Mode</div><div class="value">${pg.content_upscaled ? 'Applied (beta)' : 'Not applied'}</div></div>
             </div>
+            ${renderImageDetails(pg, 'details')}
           </div>`;
       });
 
@@ -1670,6 +2547,34 @@
         this.classList.toggle('open');
         $('detailsContainer').classList.toggle('open');
       });
+
+      document.querySelectorAll('.image-details-toggle').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-panel');
+          const panel = id ? document.getElementById(id) : null;
+          if (!panel) return;
+          btn.classList.toggle('open');
+          panel.classList.toggle('open');
+        });
+      });
+
+      document.querySelectorAll('.image-upscale-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const page = Number(btn.getAttribute('data-upscale-page'));
+          const image = Number(btn.getAttribute('data-upscale-image'));
+          const progressId = btn.getAttribute('data-upscale-progress');
+          const wrap = progressId ? document.getElementById(progressId) : null;
+          if (!Number.isFinite(page) || page <= 0 || !Number.isFinite(image) || image <= 0) return;
+          showConfirmDialog(
+            `Upscale Page ${page}?`,
+            'This will upscale the entire page (beta) to improve low-resolution content. Other vector elements may be rasterized on this page, and results can vary.',
+            'Upscale Page',
+            async () => {
+              await upscaleSinglePage(page, image, btn, wrap);
+            }
+          );
+        });
+      });
     }
 
     // ── Wire-O Flip Book Viewer (table-top, sheet-based) ────────────
@@ -1687,7 +2592,7 @@
     let flipbookThumbs = [];
     let flipbookSheets = [];  // [{front: dataUrl, back: dataUrl|null}]
     let flipbookPageMeta = [];
-    let flipEvenPagesSetting = true;
+    let flipEvenPagesSetting = false;
     let sheetIdx = 0;
     let flipState = 'idle';
     const FLIP_MS = 600;
